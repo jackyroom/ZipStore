@@ -1,5 +1,13 @@
 const config = require('../app-config');
 
+// 将十六进制颜色转换为 rgba 格式
+function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 function render(options) {
     const { title, content, currentModule, extraHead = '', extraScripts = '' } = options;
     const { colors, glass } = config.theme;
@@ -45,6 +53,16 @@ function render(options) {
                 --glass-bg: rgba(30, 41, 59, ${glass.opacity});
                 --glass-blur: ${glass.blur};
                 --glass-border: ${glass.border};
+                /* 带透明度的颜色变量 */
+                --primary-15: ${hexToRgba(colors.primary, 0.15)};
+                --primary-10: ${hexToRgba(colors.primary, 0.1)};
+                --primary-30: ${hexToRgba(colors.primary, 0.3)};
+                --secondary-15: ${hexToRgba(colors.secondary, 0.15)};
+                --accent-15: ${hexToRgba(colors.accent, 0.15)};
+                --bg-60: ${hexToRgba(colors.background, 0.6)};
+                --bg-80: ${hexToRgba(colors.background, 0.8)};
+                --text-muted-60: ${hexToRgba(colors.textMuted, 0.6)};
+                --text-muted-50: ${hexToRgba(colors.textMuted, 0.5)};
             }
         </style>
         ${extraHead}

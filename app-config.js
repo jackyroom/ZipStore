@@ -1,6 +1,6 @@
 module.exports = {
     site: {
-        title: "JackyRoom",
+        title: "ZIPSTORE",
         subtitle: "探索 · 创造 · 分享",
         description: "集技术博客、资源分享与生活记录于一体的个人数字空间",
         author: "Jacky",

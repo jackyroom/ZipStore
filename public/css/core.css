@@ -13,12 +13,12 @@
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: #0f172a;
-    /* 动态极光背景 */
+    background-color: var(--bg-color);
+    /* 动态极光背景 - 使用配置的颜色 */
     background-image: 
-        radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%), 
-        radial-gradient(circle at 100% 0%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 100% 100%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 0% 0%, var(--primary-15) 0%, transparent 50%), 
+        radial-gradient(circle at 100% 0%, var(--secondary-15) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, var(--accent-15) 0%, transparent 50%),
         radial-gradient(circle at 0% 100%, rgba(16, 185, 129, 0.15) 0%, transparent 50%);
     background-attachment: fixed;
     background-size: 200% 200%;
@@ -50,7 +50,7 @@ button { font-family: inherit; }
     display: flex;
     flex-direction: column;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
-    background: rgba(15, 23, 42, 0.6); /* 半透明 */
+    background: var(--bg-60); /* 使用配置的背景色 */
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     z-index: 100;
@@ -67,7 +67,7 @@ button { font-family: inherit; }
     font-size: 1.4rem; 
     font-weight: 800; 
     letter-spacing: -0.5px;
-    background: linear-gradient(to right, #fff, #94a3b8);
+    background: linear-gradient(to right, var(--text-main), var(--text-muted));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -78,7 +78,7 @@ button { font-family: inherit; }
     border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: 1.2rem;
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 20px var(--primary-30);
 }
 
 .nav-menu {
@@ -93,7 +93,7 @@ button { font-family: inherit; }
     margin-top: 8px;
     font-size: 0.7rem;
     font-weight: 700;
-    color: rgba(148, 163, 184, 0.6);
+    color: var(--text-muted-60);
     letter-spacing: 1.5px;
     text-transform: uppercase;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -128,7 +128,7 @@ button { font-family: inherit; }
 
 /* 导航选中状态 */
 .nav-item.active {
-    background: rgba(99, 102, 241, 0.1);
+    background: var(--primary-10);
     color: var(--primary);
     font-weight: 600;
 }
@@ -145,7 +145,7 @@ button { font-family: inherit; }
 .sidebar-footer {
     padding: 30px;
     font-size: 0.8rem;
-    color: rgba(148, 163, 184, 0.5);
+    color: var(--text-muted-50);
     text-align: center;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -192,7 +192,7 @@ button { font-family: inherit; }
 /* 卡片悬停光效 */
 .glass-card:hover {
     transform: translateY(-8px);
-    border-color: rgba(99, 102, 241, 0.3);
+    border-color: var(--primary-30);
     box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
     background: rgba(30, 41, 59, 0.6);
 }
@@ -206,7 +206,7 @@ button { font-family: inherit; }
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
-    background: rgba(15, 23, 42, 0.8);
+    background: var(--bg-80);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(255,255,255,0.05);
     position: sticky;
@@ -232,7 +232,7 @@ button { font-family: inherit; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
 
 @media (max-width: 768px) {
-    .sidebar { position: fixed; transform: translateX(-100%); background: #0f172a; width: 85%; box-shadow: 50px 0 100px rgba(0,0,0,0.5); }
+    .sidebar { position: fixed; transform: translateX(-100%); background: var(--bg-color); width: 85%; box-shadow: 50px 0 100px rgba(0,0,0,0.5); }
     .sidebar.show { transform: translateX(0); }
     .mobile-header { display: flex; }
     .content-wrapper { padding: 20px; }
