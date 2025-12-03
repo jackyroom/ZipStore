@@ -107,6 +107,41 @@ ul { list-style: none; }
     text-align: center;
 }
 
+.sidebar-footer .social-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.sidebar-footer .social-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--bg-60);
+    color: var(--text-muted);
+    font-size: 20px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    border: 1px solid var(--glass-border);
+}
+
+.sidebar-footer .social-btn:hover {
+    background: var(--primary-15);
+    color: var(--primary);
+    transform: translateY(-2px);
+    border-color: var(--primary);
+}
+
+.sidebar-footer .social-btn i {
+    line-height: 1;
+    display: inline-block;
+}
+
 /* --- Main Content Layout (Updated) --- */
 .main-content {
     flex: 1;

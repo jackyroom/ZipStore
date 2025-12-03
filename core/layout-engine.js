@@ -74,11 +74,11 @@ function render(options) {
         
         <!-- 字体与图标 -->
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
         
         <!-- 样式表 -->
-        <link rel="stylesheet" href="/css/core.css">
-        <link rel="stylesheet" href="/css/modules.css">
+        <link rel="stylesheet" href="/core/core.css">
         
         <style>
             :root {
@@ -120,6 +120,17 @@ function render(options) {
                 </nav>
                 
                 <div class="sidebar-footer">
+                    <div class="social-links">
+                        <a href="https://www.artstation.com" target="_blank" title="ArtStation" class="social-btn">
+                            <i class="ri-artboard-fill"></i>
+                        </a>
+                        <a href="https://www.bilibili.com" target="_blank" title="Bilibili" class="social-btn">
+                            <i class="ri-bilibili-fill"></i>
+                        </a>
+                        <a href="https://github.com/jackyroom" target="_blank" title="GitHub" class="social-btn">
+                            <i class="ri-github-fill"></i>
+                        </a>
+                    </div>
                     <p>${config.site.footerText}</p>
                 </div>
             </aside>
@@ -137,7 +148,7 @@ function render(options) {
         </div>
 
         <!-- 脚本 -->
-        <script src="/js/core.js"></script>
+        <script src="/core/core.js"></script>
         <script src="/js/app-interactions.js"></script>
         ${extraScripts}
     </body>
