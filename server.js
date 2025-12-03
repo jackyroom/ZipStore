@@ -9,6 +9,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// 为每个模块提供静态文件服务（CSS、JS等）
+app.use('/modules', express.static(path.join(__dirname, 'modules'), {
+    setHeaders: (res, filePath) => {
+        // 根据文件扩展名设置正确的 Content-Type
+        if (filePath.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+        } else if (filePath.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
+        }
+    }
+}));
+
 // 挂载模块
 loadModules(app);
 
