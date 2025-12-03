@@ -1,54 +1,390 @@
-/* =========================================
-   Gallery Module Styles
-   路径: /modules/gallery/gallery.css
-   ========================================= */
+/* 光影画廊模块专用样式 
+   所有样式均限定在 .gallery-module-container 下，防止污染全局或侧边栏 
+*/
 
-.gallery-container {
-    column-count: 4;
+.gallery-module-container {
+    /* 局部变量定义，不污染全局 :root */
+    --gal-bg: #121212;
+    --gal-card-bg: #1e1e1e;
+    --gal-text-main: #ffffff;
+    --gal-text-sub: #a0a0a0;
+    --gal-accent: #007aff; /* ArtStation 蓝 / 也可以改成 Pinterest 红 #e60023 */
+    --gal-radius: 12px;
+    --gal-gap: 20px;
+    
+    background-color: var(--gal-bg);
+    color: var(--gal-text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    width: 100%;
+    min-height: 100%;
+    box-sizing: border-box;
+}
+
+/* 头部 Hero 区域 
+   使用 sticky 定位和 backdrop-filter 实现毛玻璃吸顶效果
+*/
+.gallery-module-container .gallery-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    padding: 30px 40px 20px;
+    background: rgba(18, 18, 18, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    flex-direction: column;
     gap: 20px;
 }
 
-.gallery-item {
-    break-inside: avoid;
-    margin-bottom: 20px;
-    border-radius: 16px;
-    overflow: hidden;
-    position: relative;
-    transition: 0.3s;
-    cursor: zoom-in;
-}
-
-.gallery-item img {
+/* 搜索栏容器 */
+.gallery-module-container .search-wrapper {
+    display: flex;
+    justify-content: center;
     width: 100%;
-    display: block;
 }
 
-.gallery-overlay {
+.gallery-module-container .search-box {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+}
+
+.gallery-module-container .search-input {
+    width: 100%;
+    padding: 14px 24px;
+    padding-left: 50px;
+    border-radius: 30px;
+    border: 1px solid #333;
+    background-color: #252525;
+    color: white;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.gallery-module-container .search-input:focus {
+    background-color: #2a2a2a;
+    border-color: var(--gal-accent);
+    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15);
+}
+
+.gallery-module-container .search-icon {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-    padding: 20px;
-    opacity: 0;
-    transition: 0.3s;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    font-size: 18px;
+}
+
+/* 分类标签栏 */
+.gallery-module-container .tags-nav {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    justify-content: center;
+    /* 隐藏滚动条但允许滚动 */
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+}
+
+.gallery-module-container .tags-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.gallery-module-container .tag-pill {
+    padding: 8px 18px;
+    background-color: #252525;
+    color: var(--gal-text-sub);
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.gallery-module-container .tag-pill:hover {
+    background-color: #333;
     color: white;
 }
 
-.gallery-item:hover .gallery-overlay {
+.gallery-module-container .tag-pill.active {
+    background-color: var(--gal-text-main);
+    color: #000;
+    font-weight: 600;
+}
+
+/* 瀑布流布局核心 
+   使用 CSS Multi-column 实现，这是实现纯 CSS 瀑布流最高效的方法
+*/
+.gallery-module-container .masonry-grid {
+    padding: 20px 40px;
+    column-count: 5;
+    column-gap: var(--gal-gap);
+}
+
+/* 响应式列数调整 */
+@media (max-width: 1600px) { .gallery-module-container .masonry-grid { column-count: 4; } }
+@media (max-width: 1200px) { .gallery-module-container .masonry-grid { column-count: 3; } }
+@media (max-width: 900px) { .gallery-module-container .masonry-grid { column-count: 2; padding: 20px; } }
+@media (max-width: 600px) { .gallery-module-container .masonry-grid { column-count: 1; } }
+
+/* 图片卡片 */
+.gallery-module-container .pin-card {
+    break-inside: avoid; /* 防止卡片被列截断 */
+    margin-bottom: var(--gal-gap);
+    background-color: var(--gal-card-bg);
+    border-radius: var(--gal-radius);
+    overflow: hidden;
+    position: relative;
+    cursor: zoom-in;
+    transition: transform 0.2s ease;
+    will-change: transform;
+}
+
+.gallery-module-container .pin-card:hover {
+    transform: translateY(-4px);
+    z-index: 2;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+}
+
+.gallery-module-container .pin-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: opacity 0.3s;
+}
+
+/* 卡片悬停遮罩 */
+.gallery-module-container .pin-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.8) 100%);
+    opacity: 0;
+    transition: opacity 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 15px;
+}
+
+.gallery-module-container .pin-card:hover .pin-overlay {
     opacity: 1;
 }
 
-/* 响应式 */
-@media (max-width: 768px) {
-    .gallery-container {
-        column-count: 2;
-    }
+/* 卡片顶部操作按钮 */
+.gallery-module-container .pin-top-actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
 }
 
-@media (max-width: 480px) {
-    .gallery-container {
-        column-count: 1;
-    }
+.gallery-module-container .pin-card:hover .pin-top-actions {
+    opacity: 1;
+    transform: translateY(0);
 }
 
+.gallery-module-container .action-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+}
+
+.gallery-module-container .action-btn:hover {
+    background: #fff;
+    transform: scale(1.1);
+}
+
+.gallery-module-container .save-btn {
+    background-color: var(--gal-accent);
+    color: white;
+    font-weight: bold;
+    width: auto;
+    padding: 0 14px;
+    border-radius: 16px;
+}
+
+.gallery-module-container .save-btn:hover {
+    background-color: #005ecb; /* 深一点的蓝色 */
+}
+
+/* 卡片底部信息 */
+.gallery-module-container .pin-info {
+    transform: translateY(10px);
+    transition: transform 0.2s;
+}
+
+.gallery-module-container .pin-card:hover .pin-info {
+    transform: translateY(0);
+}
+
+.gallery-module-container .pin-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.gallery-module-container .pin-author {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #ddd;
+}
+
+.gallery-module-container .author-img {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #444;
+}
+
+/* 全屏灯箱 (Lightbox) 
+   独立于 wrapper，位于 body 下，层级极高
+*/
+.gallery-lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999; /* 确保覆盖一切，包括侧边栏 */
+    display: flex;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+.gallery-lightbox.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.gallery-lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+    z-index: 10001;
+    background: none;
+    border: none;
+    padding: 10px;
+    line-height: 0.5;
+}
+
+.gallery-lightbox-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    background: #181818;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.gallery-lightbox-media {
+    flex: 1;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.gallery-lightbox-media img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.gallery-lightbox-details {
+    width: 360px;
+    background: #1e1e1e;
+    border-left: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+    color: white;
+}
+
+.details-header {
+    padding: 20px;
+    border-bottom: 1px solid #333;
+}
+
+.details-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.details-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.detail-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 20px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.detail-btn.primary {
+    background: var(--gal-accent);
+    color: white;
+}
+
+.detail-btn.secondary {
+    background: #333;
+    color: white;
+}
+
+.detail-tag {
+    display: inline-block;
+    background: #333;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    color: #ccc;
+}
+
+/* 移动端灯箱适配 */
+@media (max-width: 800px) {
+    .gallery-lightbox { padding: 0; }
+    .gallery-lightbox-container { flex-direction: column; border-radius: 0; }
+    .gallery-lightbox-media { height: 60%; flex: none; }
+    .gallery-lightbox-details { width: 100%; height: 40%; border-left: none; border-top: 1px solid #333; }
+}
