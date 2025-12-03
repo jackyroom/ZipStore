@@ -1,0 +1,54 @@
+/* =========================================
+   Gallery Module Styles
+   路径: /modules/gallery/gallery.css
+   ========================================= */
+
+.gallery-container {
+    column-count: 4;
+    gap: 20px;
+}
+
+.gallery-item {
+    break-inside: avoid;
+    margin-bottom: 20px;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    transition: 0.3s;
+    cursor: zoom-in;
+}
+
+.gallery-item img {
+    width: 100%;
+    display: block;
+}
+
+.gallery-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    padding: 20px;
+    opacity: 0;
+    transition: 0.3s;
+    color: white;
+}
+
+.gallery-item:hover .gallery-overlay {
+    opacity: 1;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .gallery-container {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 480px) {
+    .gallery-container {
+        column-count: 1;
+    }
+}
+

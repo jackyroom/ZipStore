@@ -12,7 +12,7 @@ function render(options) {
     const { title, content, currentModule, extraHead = '', extraScripts = '' } = options;
     const { colors, glass } = config.theme;
     
-    // --- 核心升级：支持菜单分组标题渲染 ---
+    // --- 侧边栏菜单渲染逻辑 ---
     const navHtml = config.menu.map(item => {
         // 如果是标题类型
         if (item.type === 'header') {
@@ -24,6 +24,44 @@ function render(options) {
             <span>${item.label}</span>
         </a>`;
     }).join('');
+
+    // --- 顶部导航栏 HTML (新增) ---
+    const topBarHtml = `
+    <header class="top-bar glass-card">
+        <!-- 移动端菜单按钮 -->
+        <button class="menu-toggle mobile-only"><i class="fa-solid fa-bars"></i></button>
+        
+        <!-- 左侧：全局搜索栏 -->
+        <div class="top-bar-left">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" placeholder="搜索资源、文章..." />
+            </div>
+        </div>
+
+        <!-- 右侧：功能区 -->
+        <div class="top-bar-right">
+            <!-- 通知按钮 -->
+            <div class="action-btn notification-wrapper" title="通知">
+                <i class="fa-regular fa-bell"></i>
+                <span class="badge-dot"></span>
+            </div>
+            
+            <!-- 用户头像/登录区域 -->
+            <a href="/auth/login" class="user-profile-widget" title="用户中心">
+                <div class="avatar-ring">
+                    <!-- 使用默认头像或配置中的头像 -->
+                    <img src="${config.site.favicon || '/favicon.ico'}" alt="User" onerror="this.src='https://ui-avatars.com/api/?name=Guest&background=random'"/>
+                </div>
+                <div class="user-info desktop-only">
+                    <span class="name">游客用户</span>
+                    <span class="role">点击登录</span>
+                </div>
+                <i class="fa-solid fa-chevron-down desktop-only" style="font-size: 0.8em; opacity: 0.5;"></i>
+            </a>
+        </div>
+    </header>
+    `;
 
     return `
     <!DOCTYPE html>
@@ -53,7 +91,8 @@ function render(options) {
                 --glass-bg: rgba(30, 41, 59, ${glass.opacity});
                 --glass-blur: ${glass.blur};
                 --glass-border: ${glass.border};
-                /* 带透明度的颜色变量 */
+                
+                /* 生成带透明度的颜色变量，用于悬停和背景 */
                 --primary-15: ${hexToRgba(colors.primary, 0.15)};
                 --primary-10: ${hexToRgba(colors.primary, 0.1)};
                 --primary-30: ${hexToRgba(colors.primary, 0.3)};
@@ -87,14 +126,11 @@ function render(options) {
 
             <!-- 主内容 -->
             <main class="main-content">
-                <header class="mobile-header">
-                    <div style="display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.2rem;">
-                        <i class="fa-solid fa-bolt" style="color:var(--primary)"></i> ${config.site.title}
-                    </div>
-                    <button class="menu-toggle"><i class="fa-solid fa-bars"></i></button>
-                </header>
+                <!-- 注入顶部导航栏 -->
+                ${topBarHtml}
 
-                <div class="content-wrapper fade-in">
+                <!-- 内容显示区 -->
+                <div class="content-wrapper custom-scroll fade-in">
                     ${content}
                 </div>
             </main>

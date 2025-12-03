@@ -1,0 +1,121 @@
+/* =========================================
+   Admin Module Styles
+   路径: /modules/admin/admin.css
+   ========================================= */
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    color: var(--text-main);
+}
+
+.admin-table th,
+.admin-table td {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.admin-table th {
+    color: var(--primary);
+    font-weight: 600;
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.admin-table tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.admin-form label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.admin-form input,
+.admin-form textarea,
+.admin-form select {
+    width: 100%;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--glass-border);
+    padding: 12px;
+    color: var(--text-main);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: 0.2s;
+}
+
+.admin-form input:focus,
+.admin-form textarea:focus,
+.admin-form select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(0,0,0,0.3);
+    box-shadow: 0 0 0 3px var(--primary-15);
+}
+
+.admin-form textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.admin-form small {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: -10px;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    margin-right: 8px;
+    transition: 0.2s;
+    border: 1px solid transparent;
+}
+
+.action-btn.view {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-main);
+    border-color: var(--glass-border);
+}
+
+.action-btn.view:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+.btn-danger {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover {
+    background: rgba(239, 68, 68, 0.4);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.tag-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: var(--primary-15);
+    color: var(--primary);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
