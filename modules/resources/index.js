@@ -1,0 +1,8 @@
+const { render } = require('../../core/layout-engine');
+    const MAP = { 'unreal': {t:'虚幻素材',i:'fa-brands fa-unity'}, 'software': {t:'软件库',i:'fa-solid fa-plug'}, 'books': {t:'书籍阅读',i:'fa-solid fa-book'}, 'games': {t:'游戏资源',i:'fa-solid fa-ghost'}, 'website': {t:'网站目录',i:'fa-solid fa-globe'} };
+    module.exports = { meta: { id: 'resources', name: '资源' }, routes: [{ path: '/:cat', method: 'get', handler: (req, res) => {
+        const cat = req.params.cat; const info = MAP[cat] || {t:'资源',i:'fa-solid fa-cube'};
+        const items = [1,2,3,4].map(i => ({title: `${info.t} - 资源示例 ${i}`, cover: `https://placehold.co/600x400/1e293b/06b6d4?text=${cat}+${i}`, tag: cat.toUpperCase()}));
+        const content = `<div class="resource-header glass-card"><div class="header-left"><i class="${info.i}" style="font-size:2rem;color:var(--primary);"></i><div><h1 style="margin:0;">${info.t}</h1><span style="color:var(--text-muted);">共 ${items.length} 个资源</span></div></div></div><div class="resource-grid">${items.map(i=>`<div class="resource-card glass-card"><div class="card-img" style="background-image:url('${i.cover}')"><span class="category-badge">${i.tag}</span></div><div class="card-body"><h3>${i.title}</h3><p style="font-size:0.8rem;color:var(--text-muted);margin:10px 0;">高品质资源示例。</p><button class="btn-block" style="border:none;background:rgba(255,255,255,0.1);color:#fff;padding:8px;border-radius:6px;cursor:pointer;">查看详情</button></div></div>`).join('')}</div><link rel="stylesheet" href="/css/modules.css">`;
+        res.send(render({ title: info.t, currentModule: 'resources', content }));
+    }}]};

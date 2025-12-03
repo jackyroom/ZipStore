@@ -1,0 +1,1 @@
+function toggleLike(btn) { const i = btn.querySelector('i'); if(i.classList.contains('fa-regular')){ i.classList.replace('fa-regular','fa-solid'); i.style.color='#ec4899'; } else { i.classList.replace('fa-solid','fa-regular'); i.style.color='inherit'; } }

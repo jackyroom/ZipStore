@@ -1,0 +1,6 @@
+const { render } = require('../../core/layout-engine'); const config = require('../../app-config');
+    module.exports = { meta: { id: 'home', name: '首页' }, routes: [{ path: '/', method: 'get', handler: (req, res) => {
+        // 读取配置中的菜单生成首页卡片（排除 header 类型和 home）
+        const cards = config.menu.filter(m => m.id && m.id !== 'home' && m.type !== 'header').map(m=>`<a href="${m.path}" class="glass-card" style="text-align:center;"><div style="font-size:2rem;color:var(--primary);margin-bottom:10px;"><i class="${m.icon}"></i></div><div style="font-weight:bold;">${m.label}</div></a>`).join('');
+        res.send(render({ title: '首页', currentModule: 'home', content: `<div style="text-align:center;padding:80px 0;"><h1 style="font-size:3.5rem;margin-bottom:20px;background:linear-gradient(to right,#fff,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${config.site.title}</h1><p style="color:var(--text-muted);font-size:1.2rem;">${config.site.subtitle}</p><div style="margin-top:40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;max-width:1000px;margin-left:auto;margin-right:auto;">${cards}</div></div>` }));
+    }}]};

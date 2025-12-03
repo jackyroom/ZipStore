@@ -1,0 +1,20 @@
+{
+  "watch": [
+    "server.js",
+    "app-config.js",
+    "core/**/*.js",
+    "modules/**/*.js",
+    "public/**/*.css",
+    "public/**/*.js"
+  ],
+  "ext": "js,json,css",
+  "ignore": [
+    "node_modules/**",
+    "data/**",
+    "*.db"
+  ],
+  "exec": "node server.js",
+  "verbose": true,
+  "delay": 500
+}
+
