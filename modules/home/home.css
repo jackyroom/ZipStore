@@ -430,6 +430,224 @@
     letter-spacing: 0.05em;
 }
 
+/* --- 3D 预览功能扩展样式 --- */
+
+/* 卡片上的 3D 预览按钮 */
+.card-3d-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(59, 130, 246, 0.9);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    opacity: 0;
+    transform: translateX(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.card-3d-btn:hover {
+    background: #2563eb;
+    transform: scale(1.1) !important;
+}
+
+.work-card:hover .card-3d-btn {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.work-card:hover .media-type-icon {
+    opacity: 0;
+}
+
+/* --- 全屏 3D 预览视口 --- */
+.home-3d-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #0f172a;
+    z-index: 20000;
+    display: flex;
+    flex-direction: column;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease, visibility 0.3s;
+}
+
+.home-3d-modal.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* 动态容器：用于每次重新注入 model-viewer */
+#modelViewerContainer {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+}
+
+model-viewer {
+    width: 100%;
+    height: 100%;
+    --progress-bar-color: #3b82f6;
+}
+
+/* 顶部控制栏 */
+.viewer-top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
+    z-index: 10;
+    pointer-events: none;
+}
+
+.viewer-controls-left {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    pointer-events: auto;
+}
+
+.viewer-title {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+/* 视图模式切换按钮组 */
+.view-mode-group {
+    display: flex;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    padding: 4px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mode-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mode-btn:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.mode-btn.active {
+    background: #3b82f6;
+    color: white;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+.viewer-close-btn {
+    pointer-events: auto;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+}
+
+.viewer-close-btn:hover {
+    background: rgba(239, 68, 68, 0.8);
+    transform: rotate(90deg);
+}
+
+/* 左下角信息面板 (Sketchfab Style) */
+.model-stats-panel {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 16px;
+    color: #94a3b8;
+    font-size: 12px;
+    font-family: monospace;
+    z-index: 10;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.4s ease 0.2s;
+    pointer-events: none;
+}
+
+.home-3d-modal.active .model-stats-panel {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    margin-bottom: 6px;
+}
+
+.stat-row:last-child {
+    margin-bottom: 0;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin-top: 8px;
+}
+
+.stat-label { color: #64748b; }
+.stat-value { color: #f8fafc; font-weight: 600; }
+.file-badge {
+    background: #3b82f6;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.slot-progress-bar {
+    background-color: rgba(255, 255, 255, 0.2);
+    height: 4px;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
 @media (max-width: 768px) {
     .modal-header-bar { flex-direction: column; gap: 20px; margin-top: 80px; }
     .modal-header-right { width: 100%; }
