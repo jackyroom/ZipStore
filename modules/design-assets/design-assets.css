@@ -1,5 +1,5 @@
 /* 设计素材(综合资源)模块样式表 */
-.unreal-module-container {
+.design-assets-module-container {
     /* 统一深色主题 (Slate/Midnight Theme) - 与光影画廊保持一致 */
     --res-bg: #0f172a;          /* 页面主背景 (Slate 900) */
     --res-sidebar-bg: #0f172a;  /* 筛选栏背景 (同主背景，减少割裂感) */
@@ -32,7 +32,7 @@
 
 /* --- 模块内部头部 (Module Header) --- */
 /* 注意：这是模块内的二级导航，位于全局导航之下 */
-.unreal-header {
+.design-assets-header {
     height: 60px;
     background: var(--res-header-bg);
     backdrop-filter: blur(12px);

@@ -133,9 +133,9 @@ const CATEGORIES = [
 
 function renderPage() {
     return `
-    <div class="unreal-module-container">
+    <div class="design-assets-module-container">
         <!-- 顶部栏 -->
-        <header class="unreal-header">
+        <header class="design-assets-header">
             <div class="res-brand">
                 <i class="res-brand-icon">❖</i>
                 <span>资源工坊</span>
@@ -377,7 +377,7 @@ function renderCards(items) {
 
 module.exports = {
     meta: {
-        id: 'unreal',
+        id: 'design-assets',
         name: '设计素材',
         icon: 'cubes'
     },
@@ -390,8 +390,8 @@ module.exports = {
                 res.send(render({ 
                     title: '设计素材 - JackyRoom', 
                     content: content, 
-                    currentModule: 'unreal',
-                    extraHead: '<link rel="stylesheet" href="/modules/unreal/unreal.css">'
+                    currentModule: 'design-assets',
+                    extraHead: '<link rel="stylesheet" href="/modules/design-assets/design-assets.css">'
                 }));
             }
         }

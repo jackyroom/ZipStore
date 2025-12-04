@@ -26,7 +26,7 @@ module.exports = {
         
         // 第二组：资源仓库
         { type: 'header', label: '资源库 (Vault)' },
-        { id: 'unreal', label: '虚幻素材', path: '/unreal', icon: 'fa-brands fa-unity' },
+        { id: 'design-assets', label: '设计素材', path: '/design-assets', icon: 'fa-brands fa-unity' },
         { id: 'software', label: '软件工具', path: '/software', icon: 'fa-solid fa-plug' },
         { id: 'books', label: '书籍阅读', path: '/books', icon: 'fa-solid fa-book' },
         { id: 'website', label: '网站目录', path: '/website', icon: 'fa-solid fa-globe' },

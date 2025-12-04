@@ -83,7 +83,7 @@ if (fs.existsSync(configPath)) {
         { id: 'blog', label: '博客', path: '/blog', icon: 'fa-solid fa-pen-nib' },
         { id: 'moments', label: '动态', path: '/moments', icon: 'fa-solid fa-camera-retro' },
         { id: 'gallery', label: '画廊', path: '/gallery', icon: 'fa-solid fa-images' },
-        { id: 'resources', label: '虚幻素材', path: '/resources/unreal', icon: 'fa-brands fa-unity' },
+        { id: 'resources', label: '设计素材', path: '/resources/design-assets', icon: 'fa-brands fa-unity' },
         { id: 'resources', label: '软件库', path: '/resources/software', icon: 'fa-solid fa-plug' },
         { id: 'resources', label: '书籍', path: '/resources/books', icon: 'fa-solid fa-book' },
         { id: 'games', label: '游戏厅', path: '/games', icon: 'fa-solid fa-gamepad' },

@@ -78,7 +78,7 @@ module.exports = {
                                 <option value="blog">📝 个人博客</option>
                                 <option value="gallery">🖼️ 摄影/画廊</option>
                                 <option value="moments">📸 动态朋友圈</option>
-                                <option value="unreal">🎮 虚幻素材</option>
+                                <option value="design-assets">🎨 设计素材</option>
                                 <option value="software">🔌 软件工具</option>
                                 <option value="books">📚 书籍分享</option>
                             </select>
