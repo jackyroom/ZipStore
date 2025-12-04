@@ -26,11 +26,11 @@ module.exports = {
         
         // 第二组：资源仓库
         { type: 'header', label: '资源库 (Vault)' },
-        { id: 'resources', label: '虚幻素材', path: '/resources/unreal', icon: 'fa-brands fa-unity' },
-        { id: 'resources', label: '软件工具', path: '/resources/software', icon: 'fa-solid fa-plug' },
-        { id: 'resources', label: '书籍阅读', path: '/resources/books', icon: 'fa-solid fa-book' },
-        { id: 'resources', label: '网站目录', path: '/resources/website', icon: 'fa-solid fa-globe' },
-        { id: 'resources', label: '游戏资源', path: '/resources/games', icon: 'fa-solid fa-ghost' },
+        { id: 'unreal', label: '虚幻素材', path: '/unreal', icon: 'fa-brands fa-unity' },
+        { id: 'software', label: '软件工具', path: '/software', icon: 'fa-solid fa-plug' },
+        { id: 'books', label: '书籍阅读', path: '/books', icon: 'fa-solid fa-book' },
+        { id: 'website', label: '网站目录', path: '/website', icon: 'fa-solid fa-globe' },
+        { id: 'game-resources', label: '游戏资源', path: '/game-resources', icon: 'fa-solid fa-ghost' },
         
         // 第三组：娱乐功能
         { type: 'header', label: '娱乐 & 互动 (Fun)' },

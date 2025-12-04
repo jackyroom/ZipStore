@@ -1,0 +1,349 @@
+/* 软件工具模块样式 - 蓝色科技风格 */
+.software-module-container {
+    --software-primary: #3b82f6;      /* 蓝色主色 */
+    --software-primary-dark: #2563eb;
+    --software-bg: #0a1628;           /* 深蓝背景 */
+    --software-card-bg: #1e293b;      /* 卡片背景 */
+    --software-text: #f1f5f9;
+    --software-text-muted: #94a3b8;
+    --software-border: rgba(59, 130, 246, 0.2);
+
+    background: var(--software-bg);
+    color: var(--software-text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+}
+
+/* Header */
+.software-header {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%);
+    border-bottom: 1px solid var(--software-border);
+    padding: 50px 40px;
+}
+
+.header-content {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-content .header-icon {
+    font-size: 3.5rem;
+    margin-right: 24px;
+}
+
+.header-text {
+    flex: 1;
+}
+
+.header-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0 0 12px 0;
+    color: var(--software-text);
+}
+
+.header-desc {
+    font-size: 1.1rem;
+    color: var(--software-text-muted);
+    margin: 0;
+}
+
+.header-badge {
+    background: var(--software-primary);
+    padding: 16px 24px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.badge-count {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+}
+
+.badge-label {
+    display: block;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-top: 4px;
+}
+
+/* 分类导航 */
+.software-nav {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px 40px;
+    display: flex;
+    gap: 12px;
+    border-bottom: 1px solid var(--software-border);
+    background: rgba(30, 41, 59, 0.3);
+}
+
+.nav-item {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--software-text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.nav-item:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--software-text);
+}
+
+.nav-item.active {
+    background: var(--software-primary);
+    color: white;
+    font-weight: 600;
+    border-color: var(--software-primary);
+}
+
+/* 搜索栏 */
+.software-search {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 24px 40px;
+}
+
+.search-wrapper {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.search-wrapper .search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--software-text-muted);
+}
+
+.search-input {
+    flex: 1;
+    position: relative;
+    background: var(--software-card-bg);
+    border: 1px solid var(--software-border);
+    padding: 14px 16px 14px 44px;
+    border-radius: 10px;
+    color: var(--software-text);
+    font-size: 15px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--software-primary);
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.platform-filter {
+    background: var(--software-card-bg);
+    border: 1px solid var(--software-border);
+    color: var(--software-text);
+    padding: 14px 40px 14px 16px;
+    border-radius: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    min-width: 150px;
+}
+
+.platform-filter:hover {
+    border-color: var(--software-primary);
+}
+
+/* 软件列表 */
+.software-list {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 40px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 软件卡片 - 横向布局 */
+.software-card {
+    background: var(--software-card-bg);
+    border: 1px solid var(--software-border);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    gap: 24px;
+    transition: all 0.3s ease;
+}
+
+.software-card:hover {
+    transform: translateX(8px);
+    border-color: var(--software-primary);
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+}
+
+.card-left {
+    flex-shrink: 0;
+}
+
+.card-thumb {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+}
+
+.card-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.license-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+}
+
+.license-badge.open-source {
+    background: #10b981;
+}
+
+.license-badge.free {
+    background: #3b82f6;
+}
+
+.license-badge.commercial {
+    background: #f59e0b;
+}
+
+.card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.card-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--software-text);
+}
+
+.card-version {
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--software-primary);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.card-meta {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: var(--software-text-muted);
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.card-desc {
+    font-size: 14px;
+    color: var(--software-text-muted);
+    margin: 0 0 16px 0;
+    line-height: 1.6;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--software-border);
+}
+
+.card-stats {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+    color: var(--software-text-muted);
+}
+
+.download-btn {
+    background: var(--software-primary);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.download-btn:hover {
+    background: var(--software-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* 响应式 */
+@media (max-width: 1024px) {
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .header-badge {
+        margin-top: 24px;
+    }
+    
+    .software-card {
+        flex-direction: column;
+    }
+    
+    .card-thumb {
+        width: 100%;
+        height: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .software-nav {
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+    
+    .search-wrapper {
+        flex-direction: column;
+    }
+    
+    .platform-filter {
+        width: 100%;
+    }
+}
+
