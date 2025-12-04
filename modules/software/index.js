@@ -1,6 +1,6 @@
 const { render } = require('../../core/layout-engine');
 
-// 1. 扩展软件工具资源数据 (增加详情、教程、版本列表)
+// 1. 扩展软件工具资源数据
 const SOFTWARE_RESOURCES = [
     {
         id: 1,
@@ -60,7 +60,6 @@ const SOFTWARE_RESOURCES = [
             { ver: "4.0.0", date: "2023-11-14", size: "380 MB", link: "#" }
         ]
     },
-    // ... 为了演示，其他数据结构保持一致，此处省略重复 ...
     {
         id: 4,
         title: "OBS Studio 专业版",
@@ -123,11 +122,11 @@ function renderSoftwarePage() {
     <div class="software-module-container">
         <div class="software-toolbar">
             <div class="software-nav">
-                <div class="nav-item active">全部</div>
-                <div class="nav-item">开发工具</div>
-                <div class="nav-item">设计工具</div>
-                <div class="nav-item">3D建模</div>
-                <div class="nav-item">直播录制</div>
+                <div class="soft-nav-item active">全部</div>
+                <div class="soft-nav-item">开发工具</div>
+                <div class="soft-nav-item">设计工具</div>
+                <div class="soft-nav-item">3D建模</div>
+                <div class="soft-nav-item">直播录制</div>
             </div>
 
             <div class="software-search">
@@ -200,33 +199,27 @@ function renderSoftwarePage() {
         </div>
 
         <script>
-            // 注入数据
             const SOFT_DATA = ${JSON.stringify(SOFTWARE_RESOURCES)};
 
             const SoftwareApp = {
-                // 初始化
                 init: function() {
-                    // 导航点击逻辑
-                    document.querySelectorAll('.nav-item').forEach(item => {
+                    // 更新了选择器，使用 .soft-nav-item
+                    document.querySelectorAll('.soft-nav-item').forEach(item => {
                         item.addEventListener('click', function() {
-                            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                            document.querySelectorAll('.soft-nav-item').forEach(i => i.classList.remove('active'));
                             this.classList.add('active');
-                            // 这里可以添加筛选逻辑
                         });
                     });
 
-                    // 遮罩点击关闭
                     document.getElementById('softDetailModal').addEventListener('click', (e) => {
                         if(e.target.id === 'softDetailModal') this.closeModal();
                     });
                 },
 
-                // 打开详情页
                 openModal: function(id) {
                     const item = SOFT_DATA.find(d => d.id == id);
                     if(!item) return;
 
-                    // 填充头部信息
                     document.getElementById('sThumb').src = item.thumb;
                     document.getElementById('sTitle').innerText = item.title;
                     document.getElementById('sAuthor').innerText = item.author;
@@ -236,11 +229,9 @@ function renderSoftwarePage() {
                     document.getElementById('sDownloads').innerText = item.downloads;
                     document.getElementById('sSize').innerText = item.size;
 
-                    // 填充介绍与教程
                     document.getElementById('sDesc').innerText = item.description || "暂无介绍";
                     document.getElementById('sTutorial').innerText = item.tutorial || "直接安装即可。";
 
-                    // 渲染版本列表
                     const verList = document.getElementById('sVersionList');
                     if (item.history_versions && item.history_versions.length > 0) {
                         verList.innerHTML = item.history_versions.map(v => \`
@@ -267,7 +258,6 @@ function renderSoftwarePage() {
                         \`;
                     }
 
-                    // 显示模态框
                     document.getElementById('softDetailModal').classList.add('active');
                 },
 
@@ -282,7 +272,6 @@ function renderSoftwarePage() {
     `;
 }
 
-// 渲染软件卡片 (列表页)
 function renderSoftwareCards(items) {
     return items.map(item => `
         <div class="software-card" onclick="SoftwareApp.openModal(${item.id})">
@@ -318,7 +307,6 @@ function renderSoftwareCards(items) {
     `).join('');
 }
 
-// 数字格式化
 function formatNumber(num) {
     return num > 999 ? (num/1000).toFixed(1) + 'k' : num;
 }

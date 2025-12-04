@@ -28,13 +28,13 @@
     border: 1px solid var(--software-border);
 }
 
-/* 分类导航 */
+/* 分类导航 - 已重命名类名为 .soft-nav-item 避免全局冲突 */
 .software-nav {
     display: flex;
     gap: 8px;
 }
 
-.nav-item {
+.soft-nav-item {
     padding: 8px 16px;
     border-radius: 8px;
     font-size: 14px;
@@ -42,14 +42,15 @@
     cursor: pointer;
     transition: all 0.2s;
     font-weight: 500;
+    border: 1px solid transparent;
 }
 
-.nav-item:hover {
+.soft-nav-item:hover {
     background: rgba(59, 130, 246, 0.1);
     color: var(--software-text);
 }
 
-.nav-item.active {
+.soft-nav-item.active {
     background: var(--software-primary);
     color: white;
     box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
