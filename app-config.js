@@ -39,7 +39,7 @@ module.exports = {
         
         // 第四组：系统管理
         { type: 'header', label: '系统 (System)' },
-        { id: 'profile', label: '个人中心', path: '/profile', icon: 'fa-solid fa-user-astronaut' },
+        { id: 'user', label: '个人中心', path: '/user', icon: 'fa-solid fa-user-astronaut' },
         { id: 'admin', label: '后台管理', path: '/admin', icon: 'fa-solid fa-gear' }
     ],
     
