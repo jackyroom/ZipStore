@@ -42,9 +42,9 @@
                             </div>
                             
                             <!-- File List -->
-                            <div class="pr-control-group" style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
+                            <div class="pr-control-group" style="flex:1; overflow:hidden; display:flex; flex-direction:column; min-height:300px;">
                                 <label class="pr-label">文件列表</label>
-                                <div id="cr-file-list" class="cr-file-list" style="overflow-y:auto; flex:1; max-height:200px; border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:5px;"></div>
+                                <div id="cr-file-list" class="cr-file-list" style="overflow-y:auto; flex:1; min-height:250px; max-height:400px; border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:8px;"></div>
                             </div>
 
                             <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:10px 0;">
@@ -77,7 +77,7 @@
 
                         <div class="pr-footer">
                             <button id="cr-download" class="plugin-ui-btn-primary" disabled>
-                                <i class="fa-solid fa-download"></i> 导出选定区域 (.zip)
+                                <i class="fa-solid fa-download"></i> <span id="cr-download-text">导出选定区域</span>
                             </button>
                             <div id="cr-status" style="margin-top:10px; font-size:0.85rem; color:var(--text-muted); text-align:center;"></div>
                         </div>
@@ -143,6 +143,7 @@
                     loadImage(0);
                     downloadBtn.disabled = false;
                     document.getElementById('cr-count-hint').textContent = `已选 ${state.files.length} 张图片`;
+                    updateDownloadButton();
                 }
             });
 
@@ -359,6 +360,19 @@
                 alert(`已将当前裁切设置应用到所有 ${state.files.length} 张图片`);
             });
 
+            // Update download button text based on file count
+            const updateDownloadButton = () => {
+                const count = state.files.length;
+                const downloadText = document.getElementById('cr-download-text');
+                if (count === 0) {
+                    downloadText.textContent = '导出选定区域';
+                } else if (count === 1) {
+                    downloadText.textContent = '导出图片';
+                } else {
+                    downloadText.textContent = `导出 ${count} 张图片 (.zip)`;
+                }
+            };
+
             // Export
             downloadBtn.addEventListener('click', async () => {
                 saveCurrentCrop();
@@ -366,21 +380,22 @@
                 downloadBtn.disabled = true;
 
                 try {
-                    const zip = new JSZip();
-
-                    for (let item of state.files) {
+                    const fileCount = state.files.length;
+                    
+                    // Single file: export as image directly
+                    if (fileCount === 1) {
+                        const item = state.files[0];
                         const crop = item.crop;
-                        if (!crop) continue; // Should not happen if viewed, but default fallback?
+                        if (!crop) {
+                            throw new Error('请先设置裁切区域');
+                        }
 
                         // Load raw image to canvas
                         const img = new Image();
                         img.src = URL.createObjectURL(item.file);
                         await new Promise(r => img.onload = r);
 
-                        // Calc real pixel crop
-                        // item.crop is relative to DISPLAY size? No, we stored it relative to display dims
-                        // but width/height ratios are consistent.
-                        // x_rel = x_disp / w_disp = x_real / w_real
+                        // Calculate real pixel crop
                         const sx = crop.x * img.naturalWidth;
                         const sy = crop.y * img.naturalHeight;
                         const sWidth = crop.w * img.naturalWidth;
@@ -392,26 +407,77 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, sWidth, sHeight);
 
-                        // Blob
-                        const blob = await new Promise(r => canvas.toBlob(r, item.file.type));
-                        zip.file(`cropped_${item.name}`, blob);
+                        // Convert to blob and download
+                        canvas.toBlob((blob) => {
+                            const url = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            // Preserve original extension
+                            const ext = item.name.substring(item.name.lastIndexOf('.'));
+                            link.download = `cropped_${item.name.replace(ext, '')}${ext}`;
+                            link.click();
+                            URL.revokeObjectURL(url);
+                            
+                            statusDiv.innerHTML = '<i class="fa-solid fa-check-circle"></i> 导出成功!';
+                            statusDiv.style.color = '#10b981';
+                            downloadBtn.disabled = false;
+                        }, item.file.type || 'image/png');
+                    } 
+                    // Multiple files: export as ZIP
+                    else {
+                        const zip = new JSZip();
+
+                        for (let item of state.files) {
+                            const crop = item.crop;
+                            if (!crop) continue;
+
+                            // Load raw image to canvas
+                            const img = new Image();
+                            img.src = URL.createObjectURL(item.file);
+                            await new Promise(r => img.onload = r);
+
+                            // Calculate real pixel crop
+                            const sx = crop.x * img.naturalWidth;
+                            const sy = crop.y * img.naturalHeight;
+                            const sWidth = crop.w * img.naturalWidth;
+                            const sHeight = crop.h * img.naturalHeight;
+
+                            const canvas = document.createElement('canvas');
+                            canvas.width = sWidth;
+                            canvas.height = sHeight;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, sWidth, sHeight);
+
+                            // Convert to blob and add to zip
+                            const blob = await new Promise(r => canvas.toBlob(r, item.file.type || 'image/png'));
+                            zip.file(`cropped_${item.name}`, blob);
+                        }
+
+                        statusDiv.innerHTML = '打包下载中...';
+                        const content = await zip.generateAsync({ type: "blob" });
+                        const url = URL.createObjectURL(content);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `cropped_images_${Date.now()}.zip`;
+                        link.click();
+                        URL.revokeObjectURL(url);
+
+                        statusDiv.innerHTML = `<i class="fa-solid fa-check-circle"></i> 导出成功! (${fileCount} 张图片)`;
+                        statusDiv.style.color = '#10b981';
+                        downloadBtn.disabled = false;
                     }
-
-                    statusDiv.innerHTML = '打包下载中...';
-                    const content = await zip.generateAsync({ type: "blob" });
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(content);
-                    link.download = `cropped_images_${Date.now()}.zip`;
-                    link.click();
-
-                    statusDiv.innerHTML = '导出成功!';
-                    downloadBtn.disabled = false;
 
                 } catch (e) {
                     console.error(e);
-                    statusDiv.innerHTML = 'Error: ' + e.message;
+                    statusDiv.innerHTML = '<i class="fa-solid fa-exclamation-triangle"></i> 错误: ' + e.message;
+                    statusDiv.style.color = '#ef4444';
                     downloadBtn.disabled = false;
                 }
+            });
+
+            // Update button text when files change
+            fileInput.addEventListener('change', () => {
+                setTimeout(updateDownloadButton, 100);
             });
         }
     };

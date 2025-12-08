@@ -142,6 +142,7 @@
     flex-direction: column;
     gap: 8px;
     margin-bottom: 20px;
+    min-height: 250px;
 }
 
 .cr-file-item {
