@@ -508,8 +508,7 @@ ul {
 .content-wrapper {
     opacity: 1;
     transition: opacity 0.15s ease-in-out;
-    /* 防止页面切换时的闪烁 */
-    will-change: opacity;
+    /* Removed will-change to allow child z-index to break out for modals */
 }
 
 /* 页面加载时的淡入效果（更平滑、更快） */

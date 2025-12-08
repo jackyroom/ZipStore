@@ -66,6 +66,10 @@ function renderGalleryPage() {
             <button class="gallery-lightbox-close" onclick="GalleryApp.closeLightbox()">×</button>
             
             <div class="gallery-lightbox-container">
+                <!-- 导航按钮 -->
+                <button class="lb-nav-btn prev" onclick="GalleryApp.prevImage()"><i class="fa-solid fa-chevron-left"></i></button>
+                <button class="lb-nav-btn next" onclick="GalleryApp.nextImage()"><i class="fa-solid fa-chevron-right"></i></button>
+
                 <!-- 左侧：图片展示区 -->
                 <div class="gallery-lightbox-media">
                     <img id="lbImage" src="" alt="">
@@ -118,12 +122,33 @@ function renderGalleryPage() {
 
         <!-- 模块脚本 -->
         <script>
+            // Inject server-side data to client
+            const MOCK_DATA = ${JSON.stringify(MOCK_DATA)};
+            
             const GalleryApp = {
+                currentIndex: 0,
+                currentData: MOCK_DATA,
+
                 // 打开灯箱
                 openLightbox: function(dataStr) {
                     const data = JSON.parse(decodeURIComponent(dataStr));
-                    const lb = document.getElementById('galleryLightbox');
                     
+                    // Find index in current data
+                    this.currentIndex = this.currentData.findIndex(item => item.id === data.id);
+                    if (this.currentIndex === -1) {
+                         // Fallback if not found (shouldn't happen with sync data)
+                         this.currentIndex = 0;
+                    }
+                    
+                    this.updateLightboxContent(data);
+
+                    const lb = document.getElementById('galleryLightbox');
+                    lb.classList.add('active');
+                    document.body.style.overflow = 'hidden'; // 禁止背景滚动
+                },
+
+                // 更新内容
+                updateLightboxContent: function(data) {
                     document.getElementById('lbImage').src = data.src;
                     document.getElementById('lbTitle').innerText = data.title;
                     document.getElementById('lbAuthor').innerText = data.author;
@@ -133,9 +158,18 @@ function renderGalleryPage() {
                     // 渲染标签
                     const tagsHtml = (data.tags || []).map(t => '<span class=\"detail-tag\">#'+t+'</span>').join('');
                     document.getElementById('lbTags').innerHTML = tagsHtml;
+                },
 
-                    lb.classList.add('active');
-                    document.body.style.overflow = 'hidden'; // 禁止背景滚动
+                // 下一张
+                nextImage: function() {
+                    this.currentIndex = (this.currentIndex + 1) % this.currentData.length;
+                    this.updateLightboxContent(this.currentData[this.currentIndex]);
+                },
+
+                // 上一张
+                prevImage: function() {
+                    this.currentIndex = (this.currentIndex - 1 + this.currentData.length) % this.currentData.length;
+                    this.updateLightboxContent(this.currentData[this.currentIndex]);
                 },
 
                 // 关闭灯箱
@@ -164,6 +198,15 @@ function renderGalleryPage() {
                 if (e.target === this || e.target.classList.contains('gallery-lightbox-media')) {
                     GalleryApp.closeLightbox();
                 }
+            });
+
+            // 键盘导航
+            document.addEventListener('keydown', function(e) {
+                if (!document.getElementById('galleryLightbox').classList.contains('active')) return;
+                
+                if (e.key === 'ArrowRight') GalleryApp.nextImage();
+                if (e.key === 'ArrowLeft') GalleryApp.prevImage();
+                if (e.key === 'Escape') GalleryApp.closeLightbox();
             });
 
             // 绑定标签点击

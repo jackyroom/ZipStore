@@ -150,9 +150,9 @@ module.exports = {
                     </div>
                 `;
                 // 注入独立的 CSS 文件
-                res.send(render({ 
-                    title: '博客首页', 
-                    content: html, 
+                res.send(render({
+                    title: '博客首页',
+                    content: html,
                     currentModule: 'blog',
                     extraHead: '<link rel="stylesheet" href="/modules/blog/blog.css">'
                 }));
@@ -170,6 +170,7 @@ module.exports = {
                             <div class="glass-card post-detail fade-in">
                                 <div class="detail-header" style="background: ${post.cover}">
                                     <div class="header-overlay"></div>
+                                    <a href="/blog" class="detail-back-btn"><i class="fa-solid fa-arrow-left"></i> 返回列表</a>
                                     <div class="header-content">
                                         <span class="detail-category">${post.category}</span>
                                         <h1 class="detail-title">${post.title}</h1>
@@ -202,9 +203,9 @@ module.exports = {
                         <div class="blog-sidebar">${renderSidebar()}</div>
                     </div>
                 `;
-                res.send(render({ 
-                    title: post.title, 
-                    content: html, 
+                res.send(render({
+                    title: post.title,
+                    content: html,
                     currentModule: 'blog',
                     extraHead: '<link rel="stylesheet" href="/modules/blog/blog.css">'
                 }));
@@ -315,9 +316,9 @@ module.exports = {
                         </div>
                     </div>
                 `;
-                res.send(render({ 
-                    title: '写文章', 
-                    content: html, 
+                res.send(render({
+                    title: '写文章',
+                    content: html,
                     currentModule: 'blog',
                     extraHead: '<link rel="stylesheet" href="/modules/blog/blog.css">'
                 }));

@@ -16,10 +16,8 @@
     display: flex;
     gap: 16px;
     align-items: center;
-    background: rgba(30, 41, 59, 0.4);
     padding: 10px;
     border-radius: 12px;
-    border: 1px solid rgba(51, 65, 85, 0.5);
     max-width: 900px;
     margin: 0 auto;
     width: 100%;
@@ -283,8 +281,12 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(15, 23, 42, 0.95);
-    z-index: 200;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 1000;
     display: flex;
     opacity: 0;
     pointer-events: none;
@@ -314,6 +316,47 @@
     height: 100%;
     max-width: 1600px;
     margin: 0 auto;
+    position: relative;
+    /* Context for nav buttons */
+}
+
+.lb-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.lb-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.lb-nav-btn.prev {
+    left: 40px;
+}
+
+.lb-nav-btn.next {
+    right: 440px;
+    /* Adjust based on details panel width (400px + padding) */
+}
+
+@media (max-width: 900px) {
+    .lb-nav-btn.next {
+        right: 20px;
+    }
 }
 
 .gallery-lightbox-media {
@@ -334,10 +377,41 @@
 
 .gallery-lightbox-details {
     width: 400px;
-    background: #1e293b;
-    padding: 32px;
+    background: rgba(30, 41, 59, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    border-radius: 24px;
+    margin: 40px 40px 40px 0;
+    height: calc(100% - 80px);
+    /* 40px margin top/bottom */
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    color: #f8fafc;
+}
+
+.details-scroll-area {
+    padding: 32px;
+    overflow-y: auto;
+    height: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.details-scroll-area::-webkit-scrollbar {
+    width: 6px;
+}
+
+.details-scroll-area::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.details-scroll-area::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
 }
 
 .lb-title {
