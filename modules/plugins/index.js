@@ -28,6 +28,13 @@ module.exports = {
                                 <div class="ps-nav-item active" onclick="pluginApp.filterCategory('all', this)">
                                     <i class="fa-solid fa-border-all"></i> 全部
                                 </div>
+                                <div class="ps-nav-item" onclick="pluginApp.filterCategory('installed', this)">
+                                    <i class="fa-solid fa-circle-check"></i> 已安装
+                                </div>
+                                <div class="ps-nav-item" onclick="pluginApp.filterCategory('pending', this)" id="nav-pending" style="display:none">
+                                    <i class="fa-solid fa-hourglass-half"></i> 待审核
+                                </div>
+                                <div style="height:1px; background:rgba(255,255,255,0.1); margin:8px 16px;"></div>
                                 <div class="ps-nav-item" onclick="pluginApp.filterCategory('production', this)">
                                     <i class="fa-solid fa-bolt"></i> 生产效率
                                 </div>
@@ -74,7 +81,20 @@ module.exports = {
                             </div>
                         </div>
 
-                        <!-- 插件运行模态框 -->
+                        <!-- 插件详细信息模态框 (New) -->
+                        <div id="plugin-details-modal" class="modal-backdrop" style="display:none;">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 id="details-title">插件详情</h3>
+                                    <button class="close-btn" onclick="pluginApp.closeDetails()">×</button>
+                                </div>
+                                <div class="modal-body" id="details-body" style="padding:0;">
+                                    <!-- 动态注入 Split Layout -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 插件运行模态框 (Existing) -->
                         <div id="plugin-runner-modal" class="modal-backdrop" style="display:none;">
                             <div class="modal-content">
                                 <div class="modal-header">

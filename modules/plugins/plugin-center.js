@@ -1,6 +1,6 @@
 /**
  * Plugin Center Core Logic
- * Handles catalog display, filtering, and ZIP plugin imports.
+ * Handles catalog display, filtering, ZIP imports, and Details View.
  */
 
 const PLUGIN_CATALOG = [
@@ -13,8 +13,13 @@ const PLUGIN_CATALOG = [
         downloads: '251.4K',
         category: 'production',
         iconType: 'img',
-        iconVal: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Pinterest-logo.png', // Demo icon
-        installed: false
+        iconVal: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Pinterest-logo.png',
+        installed: false,
+        status: 'published',
+        changelog: [
+            { ver: '1.2.0', date: '2025-01-15', note: '修复了部分图片无法识别的问题。' },
+            { ver: '1.1.0', date: '2024-11-20', note: '新增批量搜索功能。' }
+        ]
     },
     {
         id: 'jxl-format',
@@ -26,7 +31,11 @@ const PLUGIN_CATALOG = [
         category: 'format',
         iconType: 'text',
         iconVal: '📷',
-        installed: false
+        installed: false,
+        status: 'published',
+        changelog: [
+            { ver: '1.0.0', date: '2024-12-01', note: '初始版本发布。' }
+        ]
     },
     {
         id: 'batch-renamer',
@@ -38,7 +47,12 @@ const PLUGIN_CATALOG = [
         category: 'production',
         iconType: 'text',
         iconVal: '📝',
-        installed: true
+        installed: true,
+        status: 'published',
+        changelog: [
+            { ver: '2.1.0', date: '2025-02-10', note: '支持正则预览。' },
+            { ver: '2.0.0', date: '2025-01-05', note: '重构界面，提升性能。' }
+        ]
     },
     {
         id: 'image-compressor',
@@ -50,7 +64,11 @@ const PLUGIN_CATALOG = [
         category: 'compression',
         iconType: 'text',
         iconVal: '📉',
-        installed: true
+        installed: true,
+        status: 'published',
+        changelog: [
+            { ver: '1.5.0', date: '2025-03-01', note: '新增 WebP 转换支持。' }
+        ]
     },
     {
         id: 'theme-switcher',
@@ -62,7 +80,11 @@ const PLUGIN_CATALOG = [
         category: 'other',
         iconType: 'text',
         iconVal: '🎨',
-        installed: true
+        installed: true,
+        status: 'published',
+        changelog: [
+            { ver: '0.9.5', date: '2025-02-15', note: '修复黑暗模式下的显示 bug。' }
+        ]
     }
 ];
 
@@ -89,6 +111,8 @@ const PluginImplMap = {
 function loadPluginResources(pluginId, callback) {
     const pluginConfig = PluginImplMap[pluginId];
     if (!pluginConfig) {
+        // 对于 unknown 插件 (如导入的)，尝试通用加载或报错
+        console.warn(`No standard config for ${pluginId}, checking custom injection...`);
         callback(null);
         return;
     }
@@ -104,7 +128,6 @@ function loadPluginResources(pluginId, callback) {
     // 加载 JS
     const scriptId = `plugin-${pluginId}-script`;
     if (document.getElementById(scriptId)) {
-        // 如果已加载，直接执行回调
         if (window[pluginConfig.render]) {
             callback(window[pluginConfig.render]);
         }
@@ -132,21 +155,73 @@ function loadPluginResources(pluginId, callback) {
 // 3. PluginApp 主控逻辑
 const PluginApp = {
     currentCategory: 'all',
-    catalog: PLUGIN_CATALOG,
+    catalog: [], // Merged catalog (static + dynamic)
     installedPlugins: [],
 
+    // 初始化
     init: function () {
-        this.loadInstalledPlugins();
+        this.loadCatalog();
         this.renderList();
+        this.checkPendingStatus();
     },
 
-    // 从 LocalStorage 加载已安装信息
-    loadInstalledPlugins: function () {
-        const stored = localStorage.getItem('my_plugins');
-        if (stored) {
-            this.installedPlugins = JSON.parse(stored);
+    // 加载数据 (Static + LocalStorage Pending + LocalStorage Installed status)
+    loadCatalog: function () {
+        // Deep copy static catalog
+        let combined = JSON.parse(JSON.stringify(PLUGIN_CATALOG));
+
+        // Load Pending Plugins
+        const pending = JSON.parse(localStorage.getItem('plugin_pending_list') || '[]');
+        pending.forEach(p => {
+            // Avoid duplicates if already in static (unlikely for new imports)
+            if (!combined.find(x => x.id === p.id)) {
+                combined.unshift(p);
+            }
+        });
+
+        // Load Installed Status Sync
+        const installedIds = JSON.parse(localStorage.getItem('my_installed_ids') || '[]');
+
+        // Sync 'installed' state
+        combined.forEach(p => {
+            if (installedIds.includes(p.id)) {
+                p.installed = true;
+            } else if (p.status !== 'pending') {
+                // Ensure default compiled status is respected unless user uninstalled?
+                // For simplicity: Trust localStorage 'my_installed_ids' as source of truth for dynamic actions,
+                // but default static catalog `installed: true` items need to be initially accounted for if never run before.
+                // Logic: If Not in 'my_installed_ids' AND Not in 'uninstalled_ids', assume default.
+                // Simplified: We will just trust the `installed` flag in data for defaults, updating it if found in LS.
+                // BUT better approach: Initialize `my_installed_ids` with the defaults once.
+            }
+        });
+
+        // One-time init for defaults
+        if (!localStorage.getItem('plugin_init_done')) {
+            const defaults = combined.filter(p => p.installed).map(p => p.id);
+            localStorage.setItem('my_installed_ids', JSON.stringify(defaults));
+            localStorage.setItem('plugin_init_done', 'true');
+        }
+
+        // Re-read installed status from LS truth
+        const finalInstalledIds = JSON.parse(localStorage.getItem('my_installed_ids') || '[]');
+        combined.forEach(p => {
+            p.installed = finalInstalledIds.includes(p.id);
+        });
+
+        this.catalog = combined;
+        this.installedPlugins = combined.filter(p => p.installed);
+    },
+
+    checkPendingStatus: function () {
+        const pendingCount = this.catalog.filter(p => p.status === 'pending').length;
+        if (pendingCount > 0) {
+            document.getElementById('nav-pending').style.display = 'flex';
+            const badge = document.getElementById('updateCount'); // Reuse badge for notification
+            // badge.style.display = 'inline-block';
+            // badge.innerText = pendingCount;
         } else {
-            this.installedPlugins = [];
+            document.getElementById('nav-pending').style.display = 'none';
         }
     },
 
@@ -162,24 +237,37 @@ const PluginApp = {
 
     // 分类过滤
     filterCategory: function (cat, el) {
-        // Update UI
         document.querySelectorAll('.ps-nav-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
-
         this.currentCategory = cat;
+
+        let filtered = [];
         if (cat === 'all') {
-            this.renderList(this.catalog);
+            filtered = this.catalog.filter(p => p.status === 'published');
+        } else if (cat === 'installed') {
+            filtered = this.catalog.filter(p => p.installed);
+        } else if (cat === 'pending') {
+            filtered = this.catalog.filter(p => p.status === 'pending');
         } else {
-            const filtered = this.catalog.filter(p => p.category === cat);
-            this.renderList(filtered);
+            filtered = this.catalog.filter(p => p.category === cat && p.status === 'published');
         }
+        this.renderList(filtered);
     },
 
     // 渲染列表
-    renderList: function (list = this.catalog) {
+    renderList: function (list = null) {
+        if (!list) {
+            // Default filter logic if no list provided (refresh)
+            const cat = this.currentCategory;
+            if (cat === 'all') list = this.catalog.filter(p => p.status === 'published');
+            else if (cat === 'installed') list = this.catalog.filter(p => p.installed);
+            else if (cat === 'pending') list = this.catalog.filter(p => p.status === 'pending');
+            else list = this.catalog.filter(p => p.category === cat && p.status === 'published');
+        }
+
         const container = document.getElementById('pluginList');
         if (!container) return;
-        
+
         container.innerHTML = '';
 
         if (list.length === 0) {
@@ -196,17 +284,32 @@ const PluginApp = {
                 iconHtml = p.iconVal;
             }
 
-            // Button rendering
-            let btnHtml = '';
-            if (p.installed) {
-                btnHtml = `<button class="btn-dark" onclick="pluginApp.run('${p.id}')">运行</button>`;
+            // Status Badge
+            let tagsHtml = '';
+            if (p.status === 'pending') {
+                tagsHtml += '<span class="status-badge status-pending">待审核</span>';
+            } else if (p.installed) {
+                tagsHtml += '<span class="status-badge status-installed">已安装</span>';
+            }
+
+            // Action Button logic
+            let actionBtn = '';
+            if (p.status === 'pending') {
+                actionBtn = `<button class="btn-dark" onclick="event.stopPropagation(); pluginApp.openDetails('${p.id}')">审核</button>`;
+            } else if (p.installed) {
+                actionBtn = `<button class="btn-dark" onclick="event.stopPropagation(); pluginApp.run('${p.id}')">运行</button>`;
             } else {
-                btnHtml = `<button class="btn-blue" onclick="pluginApp.install('${p.id}')">⬇ 安装</button>`;
+                actionBtn = `<button class="btn-blue" onclick="event.stopPropagation(); pluginApp.openDetails('${p.id}')">详情</button>`;
             }
 
             const item = document.createElement('div');
             item.className = 'plugin-list-item';
+            item.onclick = () => this.openDetails(p.id); // Click whole item to open details
+            item.style.cursor = 'pointer';
+            item.style.position = 'relative';
+
             item.innerHTML = `
+                ${tagsHtml}
                 <div class="pli-icon">${iconHtml}</div>
                 <div class="pli-info">
                     <div class="pli-header">
@@ -220,27 +323,233 @@ const PluginApp = {
                     <span><i class="fa-solid fa-download"></i> ${p.downloads}</span>
                 </div>
                 <div class="pli-action">
-                    ${btnHtml}
+                    ${actionBtn}
                 </div>
             `;
             container.appendChild(item);
         });
     },
 
-    // 安装插件
+    // --- DETAILS MODAL ---
+
+    openDetails: function (id) {
+        const p = this.catalog.find(x => x.id === id);
+        if (!p) return;
+
+        const modal = document.getElementById('plugin-details-modal');
+        const body = document.getElementById('details-body');
+        const title = document.getElementById('details-title');
+
+        title.innerText = p.name;
+
+        let iconHtml = p.iconType === 'img'
+            ? `<img src="${p.iconVal}" onerror="this.parentElement.innerText='📦'">`
+            : p.iconVal;
+
+        // Action Button in Sidebar
+        let mainAction = '';
+        if (p.status === 'pending') {
+            mainAction = `
+                <button class="btn-blue" onclick="pluginApp.approve('${p.id}')">✅ 通过审核</button>
+                <button class="btn-uninstall" onclick="pluginApp.reject('${p.id}')">❌ 拒绝</button>
+            `;
+        } else if (p.installed) {
+            mainAction = `
+                <button class="btn-dark" onclick="pluginApp.run('${p.id}')">🚀 运行插件</button>
+                <button class="btn-uninstall" onclick="pluginApp.uninstall('${p.id}')">🗑️ 卸载</button>
+            `;
+        } else {
+            mainAction = `<button class="btn-blue" onclick="pluginApp.install('${p.id}')">⬇ 立即安装</button>`;
+        }
+
+        // Generate Changelog HTML
+        let changelogHtml = '<p style="color:#64748b">暂无更新记录</p>';
+        if (p.changelog && p.changelog.length > 0) {
+            changelogHtml = p.changelog.map(log => `
+                <div class="version-item">
+                    <div class="version-header">
+                        <span class="v-num">${log.ver}</span>
+                        <span class="v-date">${log.date}</span>
+                    </div>
+                    <div class="v-changes">${log.note}</div>
+                </div>
+            `).join('');
+        }
+
+        // Split Layout HTML
+        body.innerHTML = `
+            <div class="plugin-detail-layout">
+                <div class="pd-sidebar">
+                    <div class="pd-icon-container">${iconHtml}</div>
+                    <div class="pd-title-block">
+                        <h2>${p.name}</h2>
+                        <p>${p.desc}</p>
+                    </div>
+                    <div class="pd-actions">
+                        ${mainAction}
+                    </div>
+                    <div class="pd-meta">
+                        <div class="pd-meta-item">
+                            <span class="pd-meta-label">版本</span>
+                            <span class="pd-meta-value">${p.version}</span>
+                        </div>
+                        <div class="pd-meta-item">
+                            <span class="pd-meta-label">作者</span>
+                            <span class="pd-meta-value">${p.author}</span>
+                        </div>
+                        <div class="pd-meta-item">
+                            <span class="pd-meta-label">类别</span>
+                            <span class="pd-meta-value">${p.category}</span>
+                        </div>
+                        <div class="pd-meta-item">
+                            <span class="pd-meta-label">大小</span>
+                            <span class="pd-meta-value">2.4 MB</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="pd-main">
+                    <div class="pd-tabs">
+                        <div class="pd-tab active" onclick="pluginApp.switchTab(0, this)">插件介绍</div>
+                        <div class="pd-tab" onclick="pluginApp.switchTab(1, this)">版本记录</div>
+                    </div>
+                    <div class="pd-content-scroll">
+                        <div id="tab-content-0" class="pd-section">
+                            <h3>功能详情</h3>
+                            <div class="pd-text">
+                                <p>${p.desc}</p>
+                                <p>这里可以展示更详细的插件说明...</p>
+                                <ul>
+                                    <li>高效 - 极速处理核心任务</li>
+                                    <li>安全 - 本地处理，保护隐私</li>
+                                    <li>易用 - 简洁直观的操作界面</li>
+                                </ul>
+                                <div class="pd-screenshot" style="height:200px; background:#1e293b; display:flex; align-items:center; justify-content:center; color:#475569;">
+                                    插件预览截图占位符
+                                </div>
+                            </div>
+                        </div>
+                        <div id="tab-content-1" class="pd-section" style="display:none;">
+                            <h3>更新日志</h3>
+                            ${changelogHtml}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        modal.style.display = 'flex';
+    },
+
+    closeDetails: function () {
+        document.getElementById('plugin-details-modal').style.display = 'none';
+        this.renderList(); // Refresh list to reflect unexpected state changes
+    },
+
+    switchTab: function (index, el) {
+        document.querySelectorAll('.pd-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+
+        document.getElementById('tab-content-0').style.display = index === 0 ? 'block' : 'none';
+        document.getElementById('tab-content-1').style.display = index === 1 ? 'block' : 'none';
+    },
+
+    // --- ACTIONS ---
+
     install: function (id) {
         const p = this.catalog.find(x => x.id === id);
         if (p) {
-            if (confirm(`确认安装 "${p.name}"?`)) {
-                p.installed = true;
-                // 保存到已安装列表
-                if (!this.installedPlugins.find(ip => ip.id === id)) {
-                    this.installedPlugins.push(p);
-                    localStorage.setItem('my_plugins', JSON.stringify(this.installedPlugins));
-                }
-                this.renderList(); // Re-render to show "Run" button
+            // Update Data
+            p.installed = true;
+
+            // Persist
+            const currentIds = JSON.parse(localStorage.getItem('my_installed_ids') || '[]');
+            if (!currentIds.includes(id)) {
+                currentIds.push(id);
+                localStorage.setItem('my_installed_ids', JSON.stringify(currentIds));
             }
+
+            // If it was in this session's uninstalled list (if we had one), remove it
+            // Update UI in Details Modal instantly
+            this.openDetails(id);
+            // Also update background list
+            this.renderList();
         }
+    },
+
+    uninstall: function (id) {
+        if (!confirm('确定要卸载此插件吗？')) return;
+
+        const p = this.catalog.find(x => x.id === id);
+        if (p) {
+            p.installed = false;
+
+            // Persist
+            const currentIds = JSON.parse(localStorage.getItem('my_installed_ids') || '[]');
+            const newIds = currentIds.filter(x => x !== id);
+            localStorage.setItem('my_installed_ids', JSON.stringify(newIds));
+
+            this.openDetails(id);
+            this.renderList();
+        }
+    },
+
+    // Admin Actions
+    approve: function (id) {
+        const p = this.catalog.find(x => x.id === id);
+        if (p && p.status === 'pending') {
+            p.status = 'published';
+
+            // Update persisted pending list (remove it) and add to a hypothetical 'local_published' list if we wanted full persistence
+            // For now, we just update the pending list to remove it, but we need to keep the plugin in specific local storage for 'custom plugins'
+
+            // 1. Remove from Pending
+            let pending = JSON.parse(localStorage.getItem('plugin_pending_list') || '[]');
+            pending = pending.filter(x => x.id !== id);
+            localStorage.setItem('plugin_pending_list', JSON.stringify(pending));
+
+            // 2. Add to Custom Published (so it stays after refresh)
+            // Note: In a real app we would POST to server. Here we just keep it in memory/localstorage as 'published'
+            // To simplify, let's just update the in-memory catalog object since it's already merged.
+            // But if we reload, it will disappear if we don't save it somewhere else.
+            // Let's reuse 'pending' list as 'custom_plugins' but with status field.
+
+            // Actually, let's just modify the item in the 'plugin_pending_list' (which we should rename to 'custom_plugins') to have status 'published'
+            // For backward compatibility with steps, let's keep 'plugin_pending_list' but maybe write back with status='published'
+
+            // Hack for demo: Update the pending list item to be published, but keep in storage
+            // Reload logic handles this: loadCatalog loads all from 'plugin_pending_list'. 
+            // So if we save it back there with status='published', it will load as published.
+
+            p.status = 'published';
+
+            let allCustom = JSON.parse(localStorage.getItem('plugin_pending_list') || '[]');
+            const idx = allCustom.findIndex(x => x.id === id);
+            if (idx >= 0) {
+                allCustom[idx].status = 'published';
+                localStorage.setItem('plugin_pending_list', JSON.stringify(allCustom));
+            }
+
+            alert('插件审核通过！已发布到市场。');
+            this.closeDetails();
+            this.checkPendingStatus();
+            this.filterCategory('all', document.querySelector('.ps-nav-item')); // Go to all
+        }
+    },
+
+    reject: function (id) {
+        if (!confirm('拒绝并删除此插件？')) return;
+
+        // Remove from memory
+        this.catalog = this.catalog.filter(x => x.id !== id);
+
+        // Remove from storage
+        let pending = JSON.parse(localStorage.getItem('plugin_pending_list') || '[]');
+        pending = pending.filter(x => x.id !== id);
+        localStorage.setItem('plugin_pending_list', JSON.stringify(pending));
+
+        this.closeDetails();
+        this.checkPendingStatus();
+        this.renderList();
     },
 
     // 运行插件
@@ -252,10 +561,7 @@ const PluginApp = {
         const title = document.getElementById('runner-title');
         const body = document.getElementById('runner-body');
 
-        if (!modal || !title || !body) {
-            console.error('插件运行模态框元素未找到');
-            return;
-        }
+        if (!modal || !title || !body) return;
 
         title.innerText = p.name;
         body.innerHTML = '<div class="plugin-loading"><i class="fa-solid fa-spinner fa-spin"></i> 加载插件中...</div>';
@@ -267,20 +573,17 @@ const PluginApp = {
                 body.innerHTML = '';
                 PluginClass.render(body);
             } else {
-                body.innerHTML = `<div class="plugin-error"><i class="fa-solid fa-exclamation-triangle"></i> 错误：无法加载插件 "${p.name}"，请检查插件文件是否存在。</div>`;
+                body.innerHTML = `<div class="plugin-error"><i class="fa-solid fa-exclamation-triangle"></i> 错误：无法加载插件 "${p.name}"，请检查资源文件。</div>`;
             }
         });
     },
 
     closeRunner: function () {
-        const modal = document.getElementById('plugin-runner-modal');
-        if (modal) {
-            modal.style.display = 'none';
-        }
+        document.getElementById('plugin-runner-modal').style.display = 'none';
     },
 
     showUpdates: function () {
-        alert("暂无更新");
+        alert("所有插件已是最新版本");
     },
 
     // IMPORTER: Handle ZIP files
@@ -293,8 +596,6 @@ const PluginApp = {
             return;
         }
 
-        console.log("Loading ZIP:", file.name);
-
         JSZip.loadAsync(file).then(function (zip) {
             // 1. Check for manifest/plugin.json
             const manifestFile = zip.file("plugin.json") || zip.file("manifest.json");
@@ -305,46 +606,47 @@ const PluginApp = {
 
             manifestFile.async("string").then(function (content) {
                 const manifest = JSON.parse(content);
-                console.log("Manifest:", manifest);
 
-                // 2. Add to catalog
+                // 2. Add to catalog as PENDING
                 const newPlugin = {
                     id: manifest.id || ('custom-' + Date.now()),
                     name: manifest.name || file.name,
                     desc: manifest.description || 'Imported Plugin',
                     version: manifest.version || '1.0.0',
-                    author: manifest.author || 'Imported',
-                    downloads: '-',
+                    author: manifest.author || 'User Upload',
+                    downloads: '0',
                     category: manifest.category || 'other',
                     iconType: manifest.iconType || 'text',
                     iconVal: manifest.icon || '📦',
-                    installed: true
+                    installed: false,
+                    status: 'pending', // WAIT FOR REVIEW
+                    changelog: []
                 };
 
-                PluginApp.catalog.unshift(newPlugin); // Add to top
-                PluginApp.installedPlugins.push(newPlugin);
-                localStorage.setItem('my_plugins', JSON.stringify(PluginApp.installedPlugins));
-                PluginApp.renderList();
-                alert(`插件 "${newPlugin.name}" 导入成功！`);
+                // Save to 'plugin_pending_list'
+                const pending = JSON.parse(localStorage.getItem('plugin_pending_list') || '[]');
+                pending.unshift(newPlugin);
+                localStorage.setItem('plugin_pending_list', JSON.stringify(pending));
 
-                // 3. Handle Code Injection (Basic)
-                const mainJs = zip.file("index.js") || zip.file("main.js");
-                if (mainJs) {
-                    mainJs.async("string").then(code => {
-                        console.log("Injecting Custom Plugin Code...");
-                        try {
-                            const script = document.createElement('script');
-                            script.textContent = code;
-                            document.body.appendChild(script);
-                        } catch (e) {
-                            console.error("Plugin Init Error:", e);
-                        }
-                    });
+                // Reload
+                PluginApp.loadCatalog();
+                PluginApp.checkPendingStatus();
+
+                alert(`插件 "${newPlugin.name}" 上传成功！\n请等待管理员审核 (可在“待审核”分类中查看)`);
+
+                // Refresh view
+                if (PluginApp.currentCategory === 'pending') {
+                    PluginApp.renderList();
+                } else {
+                    document.getElementById('nav-pending').click(); // Auto switch to pending
                 }
             });
         }, function (e) {
             alert("Error reading " + file.name + ": " + e.message);
         });
+
+        // Reset input
+        input.value = '';
     }
 };
 
