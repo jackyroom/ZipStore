@@ -12,39 +12,65 @@ module.exports = {
             handler: (req, res) => {
                 // 页面主要 HTML 结构
                 const content = `
-                    <div class="plugin-container">
-                        <div class="plugin-header">
-                            <h2><span class="icon">🧩</span> 插件中心 (Plugin Center)</h2>
-                            <p class="subtitle">扩展您的系统能力，所有处理均在本地完成，数据安全无忧。</p>
+                    <div class="plugin-layout">
+                        <!-- 左侧侧边栏 -->
+                        <div class="plugin-sidebar">
+                            <div class="ps-header">
+                                <h2>插件中心</h2>
+                            </div>
+                            
+                            <div class="ps-search">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" placeholder="搜索插件..." id="pluginSearchInput" onkeyup="pluginApp.search(this.value)">
+                            </div>
+
+                            <div class="ps-nav">
+                                <div class="ps-nav-item active" onclick="pluginApp.filterCategory('all', this)">
+                                    <i class="fa-solid fa-border-all"></i> 全部
+                                </div>
+                                <div class="ps-nav-item" onclick="pluginApp.filterCategory('production', this)">
+                                    <i class="fa-solid fa-bolt"></i> 生产效率
+                                </div>
+                                <div class="ps-nav-item" onclick="pluginApp.filterCategory('compression', this)">
+                                    <i class="fa-solid fa-file-zipper"></i> 转档压缩
+                                </div>
+                                <div class="ps-nav-item" onclick="pluginApp.filterCategory('editor', this)">
+                                    <i class="fa-regular fa-image"></i> 图片编辑
+                                </div>
+                                <div class="ps-nav-item" onclick="pluginApp.filterCategory('video', this)">
+                                    <i class="fa-solid fa-video"></i> 视频相关
+                                </div>
+                                <div class="ps-nav-item" onclick="pluginApp.filterCategory('downloader', this)">
+                                    <i class="fa-solid fa-download"></i> 下载器
+                                </div>
+                                <div class="ps-nav-item" onclick="pluginApp.filterCategory('format', this)">
+                                    <i class="fa-solid fa-file-code"></i> 格式扩展
+                                </div>
+                                <div class="ps-nav-item" onclick="pluginApp.filterCategory('checker', this)">
+                                    <i class="fa-solid fa-stethoscope"></i> 检查器
+                                </div>
+                                <div class="ps-nav-item" onclick="pluginApp.filterCategory('other', this)">
+                                    <i class="fa-solid fa-ellipsis"></i> 其他
+                                </div>
+                            </div>
+
+                            <div class="ps-footer">
+                                <div class="ps-nav-item" onclick="pluginApp.showUpdates()">
+                                    <i class="fa-solid fa-rotate"></i> 待更新
+                                    <span class="badge" id="updateCount" style="display:none">0</span>
+                                </div>
+                                <div class="ps-nav-item" onclick="document.getElementById('zipInput').click()">
+                                    <i class="fa-solid fa-file-import"></i> 导入插件 (.zip)
+                                    <input type="file" id="zipInput" accept=".zip" style="display:none" onchange="pluginApp.importFromZip(this)">
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- 顶部导航与操作栏 -->
-                        <div class="plugin-toolbar">
-                            <div class="plugin-tabs">
-                                <button class="tab-btn active" onclick="pluginApp.switchTab('store')">插件商店 (Store)</button>
-                                <button class="tab-btn" onclick="pluginApp.switchTab('library')">已安装 (Library)</button>
-                            </div>
-                            <div class="plugin-actions">
-                                <button class="btn-secondary" onclick="pluginApp.loadCustomPlugin()">📂 加载自定义插件</button>
-                                <span class="storage-info" id="storageInfo">Local Storage: 0KB</span>
-                            </div>
-                        </div>
-
-                        <!-- 插件商店视图 -->
-                        <div id="view-store" class="plugin-view active">
-                            <div class="plugin-grid" id="store-grid">
-                                <!-- 动态加载商店内容 -->
-                                <div class="loading-spinner">加载插件目录...</div>
-                            </div>
-                        </div>
-
-                        <!-- 已安装视图 -->
-                        <div id="view-library" class="plugin-view">
-                            <div class="plugin-grid" id="library-grid">
-                                <!-- 动态加载已安装插件 -->
-                            </div>
-                            <div id="empty-library-msg" style="display:none; text-align:center; color:#888; margin-top:50px;">
-                                您还没有安装任何插件，去商店看看吧！
+                        <!-- 右侧内容区 -->
+                        <div class="plugin-content">
+                            <!-- 插件列表 -->
+                            <div class="plugin-list" id="pluginList">
+                                <!-- 动态生成 -->
                             </div>
                         </div>
 
@@ -56,12 +82,13 @@ module.exports = {
                                     <button class="close-btn" onclick="pluginApp.closeRunner()">×</button>
                                 </div>
                                 <div class="modal-body" id="runner-body">
-                                    <!-- 插件UI将渲染在这里 -->
                                 </div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- 引入 JSZip 用于解压 -->
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
                     <!-- 引入本模块专用的客户端逻辑 -->
                     <script src="/modules/plugins/plugin-center.js"></script>
                 `;
