@@ -48,6 +48,8 @@ ul {
     flex-shrink: 0;
     z-index: 200;
     transition: transform 0.3s ease;
+    /* 允许tooltip溢出显示 */
+    overflow: visible;
 }
 
 /* --- Brand in Top Bar --- */
@@ -56,6 +58,23 @@ ul {
     align-items: center;
     gap: 12px;
     margin-right: 20px;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    padding: 4px 8px;
+    margin-left: -8px;
+}
+
+.brand:hover {
+    background: var(--bg-60);
+    transform: translateY(-1px);
+}
+
+.brand:hover .logo-icon {
+    color: var(--primary);
+    transform: scale(1.1);
 }
 
 .brand h1 {
@@ -63,6 +82,11 @@ ul {
     font-weight: 800;
     letter-spacing: -0.5px;
     margin: 0;
+}
+
+.logo-icon {
+    transition: all 0.2s ease;
+    color: var(--primary);
 }
 
 /* Toggle Button */
@@ -91,6 +115,8 @@ ul {
     flex: 1;
     padding: 20px;
     overflow-y: auto;
+    /* 允许tooltip溢出显示 - 注意：overflow-x: visible 在 overflow-y: auto 时无效 */
+    /* 所以我们需要确保nav-item本身允许溢出 */
 }
 
 .nav-header {
@@ -170,6 +196,9 @@ ul {
 .sidebar.collapsed .nav-item {
     justify-content: center;
     padding: 15px 10px;
+    position: relative;
+    /* 确保tooltip可以溢出显示 */
+    overflow: visible;
 }
 
 .sidebar.collapsed .nav-item i {
@@ -177,10 +206,43 @@ ul {
     font-size: 1.3rem;
 }
 
+/* Tooltip for collapsed sidebar - 使用JavaScript动态创建 */
+.nav-tooltip {
+    position: fixed;
+    background: var(--bg-80);
+    color: var(--text-main);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    z-index: 10000;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-50%) translateX(-4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    display: none;
+}
+
+.nav-tooltip.show {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+
+.nav-tooltip::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-right-color: var(--bg-80);
+}
+
 .sidebar.collapsed .sidebar-footer {
-    display: flex;
-    justify-content: center;
-    padding: 20px 0;
+    display: none;
 }
 
 .sidebar-footer {
@@ -442,20 +504,33 @@ ul {
     /* box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); */
 }
 
+/* 页面内容平滑过渡 */
+.content-wrapper {
+    opacity: 1;
+    transition: opacity 0.15s ease-in-out;
+    /* 防止页面切换时的闪烁 */
+    will-change: opacity;
+}
+
+/* 页面加载时的淡入效果（更平滑、更快） */
 .fade-in {
-    animation: fadeIn 0.5s ease-in-out;
+    animation: fadeIn 0.2s ease-out;
 }
 
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
     }
+}
+
+/* 页面切换时的淡出效果 */
+body.page-transitioning .content-wrapper {
+    opacity: 0;
+    transition: opacity 0.1s ease-in-out;
 }
 
 /* Scrollbar */

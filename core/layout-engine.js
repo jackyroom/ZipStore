@@ -19,7 +19,7 @@ function render(options) {
             return `<div class="nav-header">${item.label}</div>`;
         }
         // 如果是普通菜单
-        return `<a href="${item.path}" class="nav-item ${currentModule === item.id ? 'active' : ''}">
+        return `<a href="${item.path}" class="nav-item ${currentModule === item.id ? 'active' : ''}" data-tooltip="${item.label}">
             <i class="${item.icon}" style="width:24px;text-align:center;"></i>
             <span>${item.label}</span>
         </a>`;
@@ -30,10 +30,10 @@ function render(options) {
     <header class="top-bar glass-card">
         <div class="top-bar-left">
             <!-- Logo区域 -->
-            <div class="brand">
+            <a href="/" class="brand" title="返回首页">
                 <div class="logo-icon"><i class="fa-solid fa-bolt"></i></div>
                 <h1 class="desktop-only">${config.site.title}</h1>
-            </div>
+            </a>
 
             <!-- 侧边栏切换按钮 (Desktop & Mobile) -->
             <button class="menu-toggle" title="切换菜单">
@@ -110,6 +110,24 @@ function render(options) {
             }
         </style>
         ${extraHead}
+        <!-- 立即应用侧边栏折叠状态，避免闪烁 -->
+        <script>
+            (function() {
+                try {
+                    // 在页面渲染前立即检查并应用折叠状态
+                    if (typeof Storage !== 'undefined') {
+                        const savedState = localStorage.getItem('sidebar-collapsed');
+                        if (savedState === 'true') {
+                            // 立即写入样式，在 HTML 解析时生效
+                            document.write('<style id="sidebar-collapsed-inline">.sidebar{width:80px !important;}.sidebar .nav-header,.sidebar .nav-item span,.sidebar .sidebar-footer{display:none !important;}.sidebar .nav-item{justify-content:center !important;padding:15px 10px !important;}.sidebar .nav-item i{margin-right:0 !important;font-size:1.3rem !important;}</style>');
+                            window.__sidebarShouldBeCollapsed = true;
+                        }
+                    }
+                } catch(e) {
+                    // localStorage 可能不可用，忽略错误
+                }
+            })();
+        </script>
     </head>
     <body>
         <div class="app-container">
@@ -118,7 +136,7 @@ function render(options) {
 
             <div class="layout-body">
                 <!-- 侧边栏 -->
-                <aside class="sidebar">
+                <aside class="sidebar" id="appSidebar">
                     <!-- Logo moved to top bar -->
                     
                     <nav class="nav-menu custom-scroll">
