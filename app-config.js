@@ -40,6 +40,7 @@ module.exports = {
         // 第四组：系统管理
         { type: 'header', label: '系统 (System)' },
         { id: 'user', label: '个人中心', path: '/user', icon: 'fa-solid fa-user-astronaut' },
+        { id: 'plugins', label: '插件中心', path: '/plugins', icon: 'fa-solid fa-puzzle-piece' },
         { id: 'admin', label: '后台管理', path: '/admin', icon: 'fa-solid fa-gear' }
     ],
     
