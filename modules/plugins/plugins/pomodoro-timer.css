@@ -1,0 +1,222 @@
+/* Pomodoro Timer CSS */
+
+.pomodoro-container {
+    width: 100%;
+    height: 100%;
+    background: #000000;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Background Animation */
+.pomodoro-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(20, 20, 30, 1) 0%, rgba(0, 0, 0, 1) 100%);
+}
+
+.pomodoro-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+/* Mode Switcher (Top) */
+.pomo-header {
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px;
+    border-radius: 20px;
+    margin-bottom: 60px;
+    backdrop-filter: blur(10px);
+}
+
+.pomo-tab {
+    padding: 8px 24px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #94a3b8;
+    transition: all 0.3s;
+}
+
+.pomo-tab.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Timer Display */
+.pomo-timer-display {
+    text-align: center;
+    margin: auto 0;
+}
+
+.timer-digits {
+    font-size: 8rem;
+    font-weight: 200;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -2px;
+    line-height: 1;
+    color: #f8fafc;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+}
+
+.timer-label {
+    font-size: 1rem;
+    color: #64748b;
+    margin-top: 16px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* Controls */
+.pomo-controls {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.pomo-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pomo-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.pomo-btn.main-action {
+    width: 80px;
+    height: 80px;
+    font-size: 1.5rem;
+    background: #10b981;
+    /* Green start */
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.pomo-btn.main-action:hover {
+    background: #34d399;
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+}
+
+.pomo-btn.main-action.running {
+    background: #ef4444;
+    /* Red stop */
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+.pomo-btn.main-action.running:hover {
+    background: #f87171;
+}
+
+/* Music Toggle */
+.music-toggle {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+    z-index: 10;
+}
+
+.music-toggle:hover,
+.music-toggle.active {
+    color: #10b981;
+}
+
+.visualizer-bars {
+    display: flex;
+    gap: 2px;
+    height: 16px;
+    align-items: flex-end;
+}
+
+.v-bar {
+    width: 3px;
+    background: currentColor;
+    border-radius: 2px;
+    animation: none;
+}
+
+.music-toggle.active .v-bar {
+    animation: bounce 0.5s infinite ease-in-out alternate;
+}
+
+.music-toggle.active .v-bar:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.music-toggle.active .v-bar:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+@keyframes bounce {
+    from {
+        height: 4px;
+    }
+
+    to {
+        height: 16px;
+    }
+}
+
+/* Preset Quick Select for Timer */
+.timer-presets {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.preset-chip {
+    padding: 6px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.preset-chip:hover,
+.preset-chip.active {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+}

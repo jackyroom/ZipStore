@@ -21,6 +21,22 @@ const PLUGIN_CATALOG = [
         ]
     },
     {
+        id: 'pomodoro-timer',
+        name: '番茄专注时钟',
+        desc: '极简风格的专注计时器，支持倒计时与时间模式，内置白噪音。',
+        version: '1.0.0',
+        author: 'ZipStore Team',
+        downloads: '0',
+        category: 'production',
+        iconType: 'text',
+        iconVal: '⏰',
+        installed: true,
+        status: 'published',
+        changelog: [
+            { ver: '1.0.0', date: '2025-03-20', note: '初始版本发布。' }
+        ]
+    },
+    {
         id: 'pinterest-finder',
         name: 'Pinterest 以图找图',
         desc: '迅速找到更多类似风格的灵感。',
@@ -120,6 +136,11 @@ const PluginImplMap = {
         js: '/modules/plugins/plugins/image-cropper.js',
         css: '/modules/plugins/plugins/image-cropper.css',
         render: 'ImageCropper'
+    },
+    'pomodoro-timer': {
+        js: '/modules/plugins/plugins/pomodoro-timer.js',
+        css: '/modules/plugins/plugins/pomodoro-timer.css',
+        render: 'PomodoroTimer'
     },
     'theme-switcher': {
         js: '/modules/plugins/plugins/theme-switcher.js',
