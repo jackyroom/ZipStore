@@ -5,6 +5,22 @@
 
 const PLUGIN_CATALOG = [
     {
+        id: 'image-cropper',
+        name: '批量图片裁切',
+        desc: '支持多图批量裁切、缩放及自定义比例导出。',
+        version: '1.0.0',
+        author: 'ZipStore Team',
+        downloads: '0',
+        category: 'editor',
+        iconType: 'text',
+        iconVal: '✂️',
+        installed: true,
+        status: 'published',
+        changelog: [
+            { ver: '1.0.0', date: '2025-03-15', note: '初始版本发布。' }
+        ]
+    },
+    {
         id: 'pinterest-finder',
         name: 'Pinterest 以图找图',
         desc: '迅速找到更多类似风格的灵感。',
@@ -99,6 +115,11 @@ const PluginImplMap = {
         js: '/modules/plugins/plugins/image-compressor.js',
         css: '/modules/plugins/plugins/image-compressor.css',
         render: 'ImageCompressor'
+    },
+    'image-cropper': {
+        js: '/modules/plugins/plugins/image-cropper.js',
+        css: '/modules/plugins/plugins/image-cropper.css',
+        render: 'ImageCropper'
     },
     'theme-switcher': {
         js: '/modules/plugins/plugins/theme-switcher.js',

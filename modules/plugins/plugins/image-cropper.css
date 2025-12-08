@@ -1,0 +1,184 @@
+/* Image Cropper CSS */
+
+/* Canvas Layout */
+.cropper-stage {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.cropper-canvas-wrapper {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.cropper-img {
+    display: block;
+    max-width: 100%;
+    max-height: 80vh;
+    pointer-events: none;
+    /* Let events pass to overlay */
+}
+
+/* Crop Overlay */
+.crop-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+/* The actual selection box */
+.crop-box {
+    position: absolute;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+    /* Dim surroundings */
+    cursor: move;
+}
+
+/* Grid Lines (Rule of Thirds) */
+.crop-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 33.33%;
+    width: 33.33%;
+    height: 100%;
+    border-left: 1px solid rgba(255, 255, 255, 0.3);
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
+    pointer-events: none;
+}
+
+.crop-box::after {
+    content: '';
+    position: absolute;
+    top: 33.33%;
+    left: 0;
+    width: 100%;
+    height: 33.33%;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    pointer-events: none;
+}
+
+/* Handles */
+.crop-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--primary);
+    border: 1px solid white;
+    border-radius: 50%;
+    z-index: 10;
+}
+
+.handle-nw {
+    top: -5px;
+    left: -5px;
+    cursor: nw-resize;
+}
+
+.handle-n {
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: n-resize;
+}
+
+.handle-ne {
+    top: -5px;
+    right: -5px;
+    cursor: ne-resize;
+}
+
+.handle-e {
+    top: 50%;
+    right: -5px;
+    transform: translateY(-50%);
+    cursor: e-resize;
+}
+
+.handle-se {
+    bottom: -5px;
+    right: -5px;
+    cursor: se-resize;
+}
+
+.handle-s {
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: s-resize;
+}
+
+.handle-sw {
+    bottom: -5px;
+    left: -5px;
+    cursor: sw-resize;
+}
+
+.handle-w {
+    top: 50%;
+    left: -5px;
+    transform: translateY(-50%);
+    cursor: w-resize;
+}
+
+/* Batch List in Sidebar */
+.cr-file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.cr-file-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.cr-file-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.cr-file-item.active {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.cr-file-icon {
+    margin-right: 10px;
+    color: #cbd5e1;
+}
+
+.cr-file-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    color: #f1f5f9;
+    flex: 1;
+}
+
+.cr-file-status {
+    font-size: 0.8rem;
+    color: var(--primary);
+}
