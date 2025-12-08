@@ -176,7 +176,7 @@ function renderPage() {
                     </div>
                     <div class="filter-list">
                         ${CATEGORIES.map((cat, idx) => `
-                            <div class="filter-row ${idx===0?'active':''}" onclick="ResApp.filterCategory('${cat.id}', this)">
+                            <div class="filter-row ${idx === 0 ? 'active' : ''}" onclick="ResApp.filterCategory('${cat.id}', this)">
                                 <div class="checkbox-mock"></div>
                                 <span>${cat.name}</span>
                             </div>
@@ -188,15 +188,22 @@ function renderPage() {
             <!-- 内容区 -->
             <main class="res-content">
                 <div class="content-toolbar">
-                    <div class="search-container">
-                        <i class="search-icon">🔍</i>
+                    <div class="module-search-box">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
                         <input type="text" class="search-input" placeholder="搜索模型、插件、音频...">
+                        <button class="search-btn">搜索</button>
                     </div>
-                    <select class="sort-select">
-                        <option>综合排序</option>
-                        <option>最新上架</option>
-                        <option>下载最多</option>
-                    </select>
+                    
+                    <div class="module-sort-box">
+                        <i class="fa-solid fa-arrow-down-short-wide sort-icon"></i>
+                        <select class="sort-select">
+                            <option>综合排序</option>
+                            <option>最新上架</option>
+                            <option>下载最多</option>
+                            <option>评分最高</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                    </div>
                 </div>
 
                 <div class="res-grid" id="resGrid">
@@ -353,7 +360,7 @@ function renderCards(items) {
                 <img class="card-thumb" src="${item.thumb}" loading="lazy">
                 <div class="card-overlay">
                      <div class="card-top-tags">
-                        ${item.software.slice(0,2).map(s => `<span style="background:rgba(0,0,0,0.5); padding:2px 6px; border-radius:4px; font-size:10px; color:white;">${s}</span>`).join('')}
+                        ${item.software.slice(0, 2).map(s => `<span style="background:rgba(0,0,0,0.5); padding:2px 6px; border-radius:4px; font-size:10px; color:white;">${s}</span>`).join('')}
                     </div>
                     <button class="card-quick-add" onclick="event.stopPropagation(); alert('Added')">
                         + 购物车
@@ -387,9 +394,9 @@ module.exports = {
             path: '/',
             handler: (req, res) => {
                 const content = renderPage();
-                res.send(render({ 
-                    title: '设计素材 - JackyRoom', 
-                    content: content, 
+                res.send(render({
+                    title: '设计素材 - JackyRoom',
+                    content: content,
                     currentModule: 'design-assets',
                     extraHead: '<link rel="stylesheet" href="/modules/design-assets/design-assets.css">'
                 }));

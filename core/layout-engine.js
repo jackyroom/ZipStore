@@ -11,7 +11,7 @@ function hexToRgba(hex, alpha) {
 function render(options) {
     const { title, content, currentModule, extraHead = '', extraScripts = '' } = options;
     const { colors, glass } = config.theme;
-    
+
     // --- 侧边栏菜单渲染逻辑 ---
     const navHtml = config.menu.map(item => {
         // 如果是标题类型
@@ -28,14 +28,23 @@ function render(options) {
     // --- 顶部导航栏 HTML (新增) ---
     const topBarHtml = `
     <header class="top-bar glass-card">
-        <!-- 移动端菜单按钮 -->
-        <button class="menu-toggle mobile-only"><i class="fa-solid fa-bars"></i></button>
-        
-        <!-- 左侧：全局搜索栏 -->
         <div class="top-bar-left">
+            <!-- Logo区域 -->
+            <div class="brand">
+                <div class="logo-icon"><i class="fa-solid fa-bolt"></i></div>
+                <h1 class="desktop-only">${config.site.title}</h1>
+            </div>
+
+            <!-- 侧边栏切换按钮 (Desktop & Mobile) -->
+            <button class="menu-toggle" title="切换菜单">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            
+            <!-- 全局搜索栏 -->
             <div class="search-box">
                 <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                <input type="text" placeholder="搜索资源、文章..." />
+                <input type="text" placeholder="搜索类型/画风/模型等寻找灵感" />
+                <button class="search-btn">找灵感</button>
             </div>
         </div>
 
@@ -53,12 +62,8 @@ function render(options) {
                     <!-- 使用默认头像或配置中的头像 -->
                     <img src="${config.site.favicon || '/favicon.ico'}" alt="User" onerror="this.src='https://ui-avatars.com/api/?name=Guest&background=random'"/>
                 </div>
-                <div class="user-info desktop-only">
-                    <span class="name">游客用户</span>
-                    <span class="role">点击登录</span>
-                </div>
-                <i class="fa-solid fa-chevron-down desktop-only" style="font-size: 0.8em; opacity: 0.5;"></i>
             </a>
+            <i class="fa-solid fa-chevron-down desktop-only" style="font-size: 0.8em; opacity: 0.5;"></i>
         </div>
     </header>
     `;
@@ -108,43 +113,42 @@ function render(options) {
     </head>
     <body>
         <div class="app-container">
-            <!-- 侧边栏 -->
-            <aside class="sidebar">
-                <div class="brand">
-                    <div class="logo-icon"><i class="fa-solid fa-bolt"></i></div>
-                    <h1>${config.site.title}</h1>
-                </div>
-                
-                <nav class="nav-menu custom-scroll">
-                    ${navHtml}
-                </nav>
-                
-                <div class="sidebar-footer">
-                    <div class="social-links">
-                        <a href="https://www.artstation.com" target="_blank" title="ArtStation" class="social-btn">
-                            <i class="ri-artboard-fill"></i>
-                        </a>
-                        <a href="https://www.bilibili.com" target="_blank" title="Bilibili" class="social-btn">
-                            <i class="ri-bilibili-fill"></i>
-                        </a>
-                        <a href="https://github.com/jackyroom" target="_blank" title="GitHub" class="social-btn">
-                            <i class="ri-github-fill"></i>
-                        </a>
+            <!-- 顶部导航栏 (全宽) -->
+            ${topBarHtml}
+
+            <div class="layout-body">
+                <!-- 侧边栏 -->
+                <aside class="sidebar">
+                    <!-- Logo moved to top bar -->
+                    
+                    <nav class="nav-menu custom-scroll">
+                        ${navHtml}
+                    </nav>
+                    
+                    <div class="sidebar-footer">
+                        <div class="simple-socials">
+                            <a href="https://www.artstation.com" target="_blank" title="ArtStation" class="social-circle">
+                                <i class="ri-artboard-fill"></i>
+                            </a>
+                            <a href="https://www.bilibili.com" target="_blank" title="Bilibili" class="social-circle">
+                                <i class="ri-bilibili-fill"></i>
+                            </a>
+                            <a href="https://github.com/jackyroom" target="_blank" title="GitHub" class="social-circle">
+                                <i class="ri-github-fill"></i>
+                            </a>
+                        </div>
+                        <p class="copyright-text">© 2025 JackyRoom 2.0. Built with Microkernel Arch.</p>
                     </div>
-                    <p>${config.site.footerText}</p>
-                </div>
-            </aside>
-
-            <!-- 主内容 -->
-            <main class="main-content">
-                <!-- 注入顶部导航栏 -->
-                ${topBarHtml}
-
-                <!-- 内容显示区 -->
-                <div class="content-wrapper custom-scroll fade-in">
-                    ${content}
-                </div>
-            </main>
+                </aside>
+    
+                <!-- 主内容 -->
+                <main class="main-content">
+                    <!-- 内容显示区 -->
+                    <div class="content-wrapper custom-scroll fade-in">
+                        ${content}
+                    </div>
+                </main>
+            </div>
         </div>
 
         <!-- 脚本 -->

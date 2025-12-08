@@ -29,17 +29,28 @@ function renderGalleryPage() {
         
         <!-- 顶部搜索和过滤区 -->
         <div class="gallery-header">
-            <div class="search-wrapper">
-                <div class="search-box">
-                    <i class="search-icon">🔍</i>
+            <div class="search-toolbar">
+                <div class="module-search-box gallery-search">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
                     <input type="text" class="search-input" placeholder="搜索灵感、标签、艺术家...">
+                    <button class="search-btn">搜索</button>
+                </div>
+                
+                <div class="module-sort-box gallery-sort">
+                    <i class="fa-solid fa-arrow-down-short-wide sort-icon"></i>
+                    <select class="sort-select">
+                        <option>综合排序</option>
+                        <option>最多浏览</option>
+                        <option>最多喜欢</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down arrow-icon"></i>
                 </div>
             </div>
             
             <div class="tags-nav">
-                ${CATEGORIES.map((tag, idx) => 
-                    `<div class="tag-pill ${idx === 0 ? 'active' : ''}">${tag}</div>`
-                ).join('')}
+                ${CATEGORIES.map((tag, idx) =>
+        `<div class="tag-pill ${idx === 0 ? 'active' : ''}">${tag}</div>`
+    ).join('')}
             </div>
         </div>
 
@@ -168,7 +179,7 @@ function renderGalleryPage() {
 function renderCard(item) {
     // 将对象序列化以便传递给 onclick
     const dataStr = encodeURIComponent(JSON.stringify(item));
-    
+
     return `
     <div class="pin-card" onclick="GalleryApp.openLightbox('${dataStr}')">
         <div class="pin-top-actions">
@@ -203,9 +214,9 @@ module.exports = {
             path: '/',
             handler: (req, res) => {
                 const content = renderGalleryPage();
-                res.send(render({ 
-                    title: '光影画廊', 
-                    content: content, 
+                res.send(render({
+                    title: '光影画廊',
+                    content: content,
                     currentModule: 'gallery',
                     extraHead: '<link rel="stylesheet" href="/modules/gallery/gallery.css">'
                 }));
