@@ -21,8 +21,8 @@
 /* --- 核心布局 --- */
 .website-layout {
     display: flex;
-    height: 100%;
-    max-width: 1800px;
+    /*height: 100%;*/
+    /*max-width: 1800px;*/
     margin: 0 auto;
 }
 
