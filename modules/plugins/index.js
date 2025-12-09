@@ -1,6 +1,8 @@
 const { render } = require('../../core/layout-engine');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
+const { spawn, spawnSync } = require('child_process');
 
 module.exports = {
     meta: {
@@ -63,6 +65,9 @@ module.exports = {
                                 </div>
                                 <div class="ps-nav-item" onclick="pluginApp.filterCategory('ai-tools', this)">
                                     <i class="fa-solid fa-robot"></i> AI 工具
+                                </div>
+                                <div class="ps-nav-item" onclick="pluginApp.filterCategory('plugin-scripts', this)">
+                                    <i class="fa-solid fa-terminal"></i> 插件脚本
                                 </div>
                                 <div class="ps-nav-item" onclick="pluginApp.filterCategory('checker', this)">
                                     <i class="fa-solid fa-stethoscope"></i> 检查器
@@ -190,6 +195,361 @@ module.exports = {
                     res.status(500).json({ catalog: [], implMap: {} });
                 }
             }
-        }
+        },
+        ...createVideoRoutes()
     ]
 };
+
+// ---------- Video download backend helpers ----------
+
+const binDir = path.join(__dirname, 'plugins', 'bin');
+const ytDlpPath = path.join(binDir, os.platform() === 'win32' ? 'yt-dlp.exe' : 'yt-dlp');
+const ffmpegPath = path.join(binDir, os.platform() === 'win32' ? 'ffmpeg.exe' : 'ffmpeg');
+const historyFile = path.join(__dirname, 'plugins', 'video-downloader', 'history.json');
+
+function resolveLocalBin(candidates) {
+    for (const p of candidates) {
+        if (p && fs.existsSync(p)) return p;
+    }
+    return null;
+}
+
+function resolveYtDlp() {
+    // 优先插件目录
+    const local = resolveLocalBin([ytDlpPath]);
+    if (local) return local;
+
+    // 其次 PATH
+    const probe = spawnSync('yt-dlp', ['--version'], { stdio: 'ignore' });
+    if (probe.status === 0) return 'yt-dlp';
+
+    return null; // 不再自动下载，按用户要求离线
+}
+
+function resolveFfmpeg() {
+    const local = resolveLocalBin([ffmpegPath]);
+    if (local) return local;
+    const probe = spawnSync('ffmpeg', ['-version'], { stdio: 'ignore' });
+    if (probe.status === 0) return 'ffmpeg';
+    return null;
+}
+
+function buildFormatSelector(quality, ffmpegAvailable, preferCodec) {
+    // 若指定了具体 format id，则直接使用；否则统一使用“带音频的最佳可用单流”
+    if (quality && quality !== 'best') return quality;
+    if (preferCodec) {
+        // 优先匹配指定编码的视频流，再退回通用 best
+        return `bestvideo[vcodec*=${preferCodec}][acodec!=none]/bestvideo[vcodec*=${preferCodec}]+bestaudio/best[acodec!=none]/best`;
+    }
+    return 'best[acodec!=none]/best';
+}
+
+function ensureHistoryFile() {
+    try {
+        const dir = path.dirname(historyFile);
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        if (!fs.existsSync(historyFile)) fs.writeFileSync(historyFile, '[]', 'utf-8');
+    } catch (e) {
+        console.error('[video-download] ensure history file failed', e);
+    }
+}
+
+function readHistory(keyword = '') {
+    ensureHistoryFile();
+    try {
+        const raw = fs.readFileSync(historyFile, 'utf-8');
+        const arr = JSON.parse(raw || '[]');
+        if (!keyword) return arr;
+        const q = keyword.toLowerCase();
+        return arr.filter(
+            (i) =>
+                (i.url || '').toLowerCase().includes(q) ||
+                (i.title || '').toLowerCase().includes(q) ||
+                (i.entryTitle || '').toLowerCase().includes(q)
+        );
+    } catch (e) {
+        console.error('[video-download] read history failed', e);
+        return [];
+    }
+}
+
+function appendHistory(record) {
+    ensureHistoryFile();
+    try {
+        const raw = fs.readFileSync(historyFile, 'utf-8');
+        const arr = JSON.parse(raw || '[]');
+        arr.unshift(record);
+        const sliced = arr.slice(0, 300); // 只保留最近 300 条
+        fs.writeFileSync(historyFile, JSON.stringify(sliced, null, 2), 'utf-8');
+    } catch (e) {
+        console.error('[video-download] append history failed', e);
+    }
+}
+
+function createVideoHandler() {
+    return async (req, res) => {
+        const url = (req.query.url || '').trim();
+        const quality = (req.query.quality || 'best').trim();
+        const subtitles = (req.query.subtitles || 'none').trim();
+        const embedSub = req.query.embedSub === 'true';
+        const audioOnly = req.query.audioOnly === 'true' || quality === 'audio';
+        const playlistItem = (req.query.item || '').trim();
+        const preferCodec = (req.query.preferCodec || '').trim();
+        const title = (req.query.title || '').trim();
+        const entryTitle = (req.query.entryTitle || '').trim();
+
+        if (!url) {
+            return res.status(400).json({ error: '缺少 url 参数' });
+        }
+
+        const ffmpegBin = resolveFfmpeg();
+        const ffmpegAvailable = !!ffmpegBin;
+
+        let ytDlp;
+        try {
+            ytDlp = resolveYtDlp();
+            if (!ytDlp) {
+                return res.status(500).json({ error: '未找到 yt-dlp，请将可执行文件放置于 modules/plugins/plugins/bin/' });
+            }
+        } catch (e) {
+            console.error('[video-download] yt-dlp 获取失败', e);
+            return res.status(500).json({ error: '自动安装 yt-dlp 失败，请检查网络或手动安装' });
+        }
+
+        const tmpDir = os.tmpdir();
+        const ext = audioOnly ? 'mp3' : 'mp4';
+        const filename = `vd-${Date.now()}-${Math.random().toString(16).slice(2)}.${ext}`;
+        const outPath = path.join(tmpDir, filename);
+
+        const args = ['-o', outPath];
+
+        if (audioOnly) {
+            args.push('-f', 'bestaudio/best', '--extract-audio', '--audio-format', 'mp3');
+        } else {
+            const fmt = buildFormatSelector(quality, ffmpegAvailable, preferCodec);
+            args.push('-f', fmt);
+            if (ffmpegAvailable) {
+                args.push('--merge-output-format', 'mp4');
+                args.push('--ffmpeg-location', ffmpegBin);
+            }
+        }
+
+        if (!audioOnly && subtitles !== 'none') {
+            args.push('--write-subs', '--sub-langs', 'all', '--convert-subs', subtitles);
+            if (embedSub) args.push('--embed-subs');
+        }
+
+        if (playlistItem) {
+            args.push('--yes-playlist', '--playlist-items', playlistItem);
+        } else {
+            args.push('--no-playlist');
+        }
+
+        args.push(url);
+
+        const proc = spawn(ytDlp, args, { stdio: 'inherit' });
+
+        proc.on('error', (err) => {
+            console.error('[video-download] spawn error', err);
+            res.status(500).json({ error: '执行 yt-dlp 失败，请确认可执行权限' });
+        });
+
+        proc.on('close', (code) => {
+            if (code !== 0) {
+                console.error('[video-download] yt-dlp exit code', code);
+                return res.status(500).json({ error: `yt-dlp 执行失败，退出码 ${code}` });
+            }
+            try {
+                const dir = path.dirname(outPath);
+                const base = path.basename(outPath);
+                const files = fs.readdirSync(dir).filter((f) => f.startsWith(base));
+
+                let targetFile = null;
+                const merged = outPath;
+                if (fs.existsSync(merged)) {
+                    targetFile = merged;
+                } else if (files.length > 0) {
+                    // 优先 mp4/mkv，选择体积最大的
+                    files.sort((a, b) => {
+                        const pa = path.join(dir, a);
+                        const pb = path.join(dir, b);
+                        const sa = fs.statSync(pa).size;
+                        const sb = fs.statSync(pb).size;
+                        return sb - sa;
+                    });
+                    targetFile = path.join(dir, files[0]);
+                }
+
+                if (!targetFile || !fs.existsSync(targetFile)) {
+                    return res.status(500).json({ error: '未找到下载产物，可能缺少 ffmpeg 或格式不受支持' });
+                }
+
+                // 记录历史（非阻塞）
+                appendHistory({
+                    id: Date.now().toString(16),
+                    url,
+                    title,
+                    entryTitle,
+                    quality,
+                    preferCodec,
+                    subtitles,
+                    embedSub,
+                    audioOnly,
+                    playlistItem,
+                    size: fs.statSync(targetFile).size,
+                    ts: Date.now()
+                });
+
+                const filenameOut = path.basename(targetFile);
+                res.setHeader('Content-Disposition', `attachment; filename="${filenameOut}"`);
+                res.setHeader('Content-Type', audioOnly ? 'audio/mpeg' : 'video/mp4');
+                const stream = fs.createReadStream(targetFile);
+                stream.pipe(res);
+                stream.on('close', () => {
+                    // 清理同前缀文件
+                    files.forEach((f) => {
+                        const fp = path.join(dir, f);
+                        if (fs.existsSync(fp)) fs.unlink(fp, () => {});
+                    });
+                    if (fs.existsSync(merged)) fs.unlink(merged, () => {});
+                });
+                stream.on('error', (err) => {
+                    console.error('[video-download] stream error', err);
+                    files.forEach((f) => {
+                        const fp = path.join(dir, f);
+                        if (fs.existsSync(fp)) fs.unlink(fp, () => {});
+                    });
+                    if (fs.existsSync(merged)) fs.unlink(merged, () => {});
+                });
+            } catch (err) {
+                console.error('[video-download] post-process error', err);
+                return res.status(500).json({ error: '处理下载结果失败，可能缺少 ffmpeg' });
+            }
+        });
+    };
+}
+
+function createVideoRoutes() {
+    const handler = createVideoHandler();
+    const formatHandler = createFormatHandler();
+    const historyHandler = createHistoryHandler();
+    return [
+        { method: 'get', path: '/api/video/download', handler },
+        { method: 'get', path: '/plugins/api/video/download', handler },
+        { method: 'get', path: '/api/video/formats', handler: formatHandler },
+        { method: 'get', path: '/plugins/api/video/formats', handler: formatHandler },
+        { method: 'get', path: '/api/video/history', handler: historyHandler },
+        { method: 'get', path: '/plugins/api/video/history', handler: historyHandler }
+    ];
+}
+
+function createFormatHandler() {
+    return async (req, res) => {
+        const url = (req.query.url || '').trim();
+        if (!url) {
+            return res.status(400).json({ error: '缺少 url 参数' });
+        }
+        const ytDlp = resolveYtDlp();
+        if (!ytDlp) {
+            return res.status(500).json({ error: '未找到 yt-dlp，可执行文件需放置于 modules/plugins/plugins/bin/' });
+        }
+
+        try {
+            const payload = await listFormats(url, ytDlp);
+            res.json(payload);
+        } catch (e) {
+            console.error('[video-download] list formats error', e);
+            res.status(500).json({ error: e.message || '获取格式失败' });
+        }
+    };
+}
+
+function createHistoryHandler() {
+    return (req, res) => {
+        try {
+            const keyword = (req.query.keyword || '').trim();
+            const list = readHistory(keyword);
+            res.json({ items: list });
+        } catch (e) {
+            console.error('[video-download] history query failed', e);
+            res.status(500).json({ error: '读取历史失败' });
+        }
+    };
+}
+
+function listFormats(url, ytDlp) {
+    return new Promise((resolve, reject) => {
+        // 使用 -J 输出纯 JSON，避免文本表格导致 JSON 解析失败
+        const proc = spawn(ytDlp, ['-J', url]);
+        let out = '';
+        let err = '';
+        proc.stdout.on('data', (d) => (out += d));
+        proc.stderr.on('data', (d) => (err += d));
+        proc.on('error', reject);
+        proc.on('close', (code) => {
+            if (code !== 0) {
+                return reject(new Error(err || `yt-dlp exit ${code}`));
+            }
+            try {
+                const json = JSON.parse(out);
+                const formats = extractFormats(json);
+                const entries = extractEntries(json);
+                const baseFormats = formats.length ? formats : extractFormats(entries[0]);
+                resolve({
+                    title: json.title || '',
+                    uploader: json.uploader || json.channel || '',
+                    duration: json.duration,
+                    isPlaylist: Array.isArray(json?.entries) && json.entries.length > 0,
+                    formats: baseFormats,
+                    entries: entries.map((e) => ({
+                        index: e.index,
+                        id: e.id,
+                        title: e.title,
+                        duration: e.duration,
+                        webpage_url: e.webpage_url,
+                        formats: extractFormats(e)
+                    }))
+                });
+            } catch (e) {
+                reject(e);
+            }
+        });
+    });
+}
+
+function extractFormats(json = {}) {
+    const list = Array.isArray(json.formats) ? json.formats : [];
+    return list.map((f) => ({
+        id: f.format_id,
+        ext: f.ext,
+        resolution: f.resolution || (f.width && f.height ? `${f.width}x${f.height}` : ''),
+        fps: f.fps,
+        vcodec: f.vcodec,
+        acodec: f.acodec,
+        filesize: f.filesize || f.filesize_approx,
+        note: f.format_note || ''
+    }));
+}
+
+function extractEntries(json = {}) {
+    if (Array.isArray(json.entries) && json.entries.length) {
+        return json.entries.map((e, idx) => ({
+            index: idx + 1,
+            id: e.id || e.cid || e.aid || `${idx + 1}`,
+            title: e.title || e.episode || json.title || `P${idx + 1}`,
+            duration: e.duration,
+            webpage_url: e.webpage_url || e.url || json.webpage_url,
+            formats: extractFormats(e)
+        }));
+    }
+    return [
+        {
+            index: 1,
+            id: json.id || '1',
+            title: json.title || '',
+            duration: json.duration,
+            webpage_url: json.webpage_url,
+            formats: extractFormats(json)
+        }
+    ];
+}

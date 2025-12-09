@@ -149,6 +149,22 @@ const PLUGIN_CATALOG = [
         changelog: [
             { ver: '0.9.5', date: '2025-02-15', note: '修复黑暗模式下的显示 bug。' }
         ]
+    },
+    {
+        id: 'video-downloader',
+        name: '视频下载',
+        desc: '输入链接，一键选择分辨率、音频与字幕并下载（需后端支持 yt-dlp）。',
+        version: '1.0.0',
+        author: 'ZipStore',
+        downloads: '0',
+        category: 'plugin-scripts',
+        iconType: 'text',
+        iconVal: '⬇️',
+        installed: true,
+        status: 'published',
+        changelog: [
+            { ver: '1.0.0', date: '2025-12-09', note: '新增多站点视频下载脚本入口。' }
+        ]
     }
 ];
 
@@ -188,6 +204,11 @@ const PluginImplMap = {
         js: '/modules/plugins/plugins/theme-switcher/theme-switcher.js',
         css: '/modules/plugins/plugins/theme-switcher/theme-switcher.css',
         render: 'ThemeSwitcher'
+    },
+    'video-downloader': {
+        js: '/modules/plugins/plugins/video-downloader/video-downloader.js',
+        css: '/modules/plugins/plugins/video-downloader/video-downloader.css',
+        render: 'VideoDownloader'
     }
 };
 

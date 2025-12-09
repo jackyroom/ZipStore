@@ -1,0 +1,20 @@
+{
+  "id": "video-downloader",
+  "name": "视频下载",
+  "desc": "输入链接，选择分辨率/音频/字幕后下载（需后端 yt-dlp 支持）。",
+  "version": "1.0.0",
+  "author": "ZipStore",
+  "category": "plugin-scripts",
+  "iconType": "text",
+  "iconVal": "⬇️",
+  "installed": true,
+  "status": "published",
+  "js": "/modules/plugins/plugins/video-downloader/video-downloader.js",
+  "css": "/modules/plugins/plugins/video-downloader/video-downloader.css",
+  "render": "VideoDownloader",
+  "changelog": [
+    { "ver": "1.0.0", "date": "2025-12-09", "note": "新增多站点视频下载脚本入口。" }
+  ]
+}
+
+
