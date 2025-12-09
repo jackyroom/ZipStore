@@ -158,11 +158,6 @@
                                     ${this.state.formats.length} 种格式
                                 </div>
                             </div>
-
-                            <div class="vd-logo-circle">
-                                <div>一点</div>
-                                <div>应用</div>
-                            </div>
                         </div>
 
                         <!-- 列表表头 -->
