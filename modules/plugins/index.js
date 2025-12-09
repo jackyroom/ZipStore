@@ -41,6 +41,9 @@ module.exports = {
                                 <div class="ps-nav-item" onclick="pluginApp.filterCategory('compression', this)">
                                     <i class="fa-solid fa-file-zipper"></i> 转档压缩
                                 </div>
+                                <div class="ps-nav-item" onclick="pluginApp.filterCategory('document-writing', this)">
+                                    <i class="fa-solid fa-file-lines"></i> 文档编写
+                                </div>
                                 <div class="ps-nav-item" onclick="pluginApp.filterCategory('coding', this)">
                                     <i class="fa-solid fa-code"></i> 代码编写
                                 </div>
@@ -55,6 +58,9 @@ module.exports = {
                                 </div>
                                 <div class="ps-nav-item" onclick="pluginApp.filterCategory('format', this)">
                                     <i class="fa-solid fa-file-code"></i> 格式扩展
+                                </div>
+                                <div class="ps-nav-item" onclick="pluginApp.filterCategory('ai-tools', this)">
+                                    <i class="fa-solid fa-robot"></i> AI 工具
                                 </div>
                                 <div class="ps-nav-item" onclick="pluginApp.filterCategory('checker', this)">
                                     <i class="fa-solid fa-stethoscope"></i> 检查器

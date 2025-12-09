@@ -27,7 +27,7 @@ const PLUGIN_CATALOG = [
         version: '1.0.0',
         author: 'ZipStore Team',
         downloads: '0',
-        category: 'efficiency',
+        category: 'document-writing',
         iconType: 'text',
         iconVal: '📝',
         installed: true,
