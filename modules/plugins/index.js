@@ -1,4 +1,6 @@
 const { render } = require('../../core/layout-engine');
+const fs = require('fs');
+const path = require('path');
 
 module.exports = {
     meta: {
@@ -129,6 +131,64 @@ module.exports = {
                     currentModule: 'plugins',
                     extraHead: '<link rel="stylesheet" href="/modules/plugins/plugins.css">'
                 }));
+            }
+        },
+        {
+            method: 'get',
+            path: '/list',
+            handler: (req, res) => {
+                try {
+                    const pluginsDir = path.join(__dirname, 'plugins');
+                    const entries = fs.readdirSync(pluginsDir, { withFileTypes: true });
+                    const catalog = [];
+                    const implMap = {};
+
+                    entries.forEach(entry => {
+                        if (!entry.isDirectory()) return;
+                        const id = entry.name;
+                        const pluginPath = path.join(pluginsDir, id);
+                        const manifestPath = path.join(pluginPath, 'manifest.json');
+
+                        let manifest = null;
+                        if (fs.existsSync(manifestPath)) {
+                            try {
+                                manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+                            } catch (e) {
+                                console.warn(`[plugins] manifest parse failed for ${id}:`, e);
+                            }
+                        }
+
+                        const safe = (v, d) => (v === undefined || v === null ? d : v);
+                        const toPascal = (str) => str.replace(/(^|[-_])(\\w)/g, (_, __, c) => c.toUpperCase());
+
+                        const fallbackCatalog = {
+                            id,
+                            name: manifest?.name || id,
+                            desc: manifest?.desc || '',
+                            version: manifest?.version || '1.0.0',
+                            author: manifest?.author || 'User',
+                            downloads: manifest?.downloads || '0',
+                            category: manifest?.category || 'other',
+                            iconType: manifest?.iconType || 'text',
+                            iconVal: manifest?.iconVal || '📦',
+                            installed: safe(manifest?.installed, true),
+                            status: manifest?.status || 'published',
+                            changelog: manifest?.changelog || []
+                        };
+
+                        const js = manifest?.js || `/modules/plugins/plugins/${id}/${id}.js`;
+                        const css = manifest?.css || `/modules/plugins/plugins/${id}/${id}.css`;
+                        const renderName = manifest?.render || toPascal(id.replace(/[^a-zA-Z0-9]/g, ''));
+
+                        catalog.push(fallbackCatalog);
+                        implMap[id] = { js, css, render: renderName };
+                    });
+
+                    res.json({ catalog, implMap });
+                } catch (err) {
+                    console.error('[plugins] list error', err);
+                    res.status(500).json({ catalog: [], implMap: {} });
+                }
             }
         }
     ]

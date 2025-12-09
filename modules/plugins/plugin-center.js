@@ -191,9 +191,12 @@ const PluginImplMap = {
     }
 };
 
+// 动态插件实现映射（来自服务器）
+let DynamicPluginImplMap = {};
+
 // 动态加载插件资源
 function loadPluginResources(pluginId, callback) {
-    const pluginConfig = PluginImplMap[pluginId];
+    const pluginConfig = PluginImplMap[pluginId] || DynamicPluginImplMap[pluginId];
     if (!pluginConfig) {
         // 对于 unknown 插件 (如导入的)，尝试通用加载或报错
         console.warn(`No standard config for ${pluginId}, checking custom injection...`);
@@ -241,18 +244,39 @@ const PluginApp = {
     currentCategory: 'all',
     catalog: [], // Merged catalog (static + dynamic)
     installedPlugins: [],
+    dynamicImplMap: {},
 
     // 初始化
-    init: function () {
-        this.loadCatalog();
+    init: async function () {
+        await this.loadCatalog();
         this.renderList();
         this.checkPendingStatus();
     },
 
     // 加载数据 (Static + LocalStorage Pending + LocalStorage Installed status)
-    loadCatalog: function () {
+    loadCatalog: async function () {
         // Deep copy static catalog
         let combined = JSON.parse(JSON.stringify(PLUGIN_CATALOG));
+
+        // 尝试获取服务器端自动发现的插件目录
+        try {
+            const resp = await fetch('/modules/plugins/list');
+            if (resp.ok) {
+                const data = await resp.json();
+                if (Array.isArray(data.catalog)) {
+                    // 将动态目录合并到前面，避免重复
+                    data.catalog.forEach(item => {
+                        if (!combined.find(x => x.id === item.id)) combined.unshift(item);
+                    });
+                }
+                if (data.implMap) {
+                    DynamicPluginImplMap = data.implMap;
+                    this.dynamicImplMap = data.implMap;
+                }
+            }
+        } catch (e) {
+            console.warn('动态插件目录获取失败，继续使用静态目录', e);
+        }
 
         // Load Pending Plugins
         const pending = JSON.parse(localStorage.getItem('plugin_pending_list') || '[]');
