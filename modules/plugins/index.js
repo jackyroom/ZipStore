@@ -41,6 +41,9 @@ module.exports = {
                                 <div class="ps-nav-item" onclick="pluginApp.filterCategory('compression', this)">
                                     <i class="fa-solid fa-file-zipper"></i> 转档压缩
                                 </div>
+                                <div class="ps-nav-item" onclick="pluginApp.filterCategory('coding', this)">
+                                    <i class="fa-solid fa-code"></i> 代码编写
+                                </div>
                                 <div class="ps-nav-item" onclick="pluginApp.filterCategory('editor', this)">
                                     <i class="fa-regular fa-image"></i> 图片编辑
                                 </div>

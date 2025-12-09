@@ -1,0 +1,307 @@
+/* Code Editor Plugin Styles */
+.code-editor-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background-color: #1e1f26;
+    color: #c5c8d4;
+    font-family: 'Lato', 'Segoe UI', sans-serif;
+    overflow: hidden;
+}
+
+/* Toolbar */
+.ce-toolbar {
+    height: 50px;
+    background-color: #131417;
+    border-bottom: 1px solid #2c2d33;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.ce-title {
+    font-weight: bold;
+    font-size: 16px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ce-title i {
+    color: #0ebeff;
+}
+
+.ce-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.ce-btn {
+    background: #444857;
+    border: none;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ce-btn:hover {
+    background: #5a5f73;
+}
+
+.ce-btn-primary {
+    background: #47cf73;
+    color: #000;
+    font-weight: bold;
+}
+
+.ce-btn-primary:hover {
+    background: #5ae085;
+}
+
+.ce-view-switch {
+    background: #2c2f38;
+    border-radius: 4px;
+    display: flex;
+    overflow: hidden;
+    margin-right: 10px;
+}
+
+.ce-view-btn {
+    background: transparent;
+    border: none;
+    color: #8a8f9c;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.ce-view-btn.active {
+    background: #444857;
+    color: #fff;
+}
+
+/* Main Layout */
+.ce-workspace {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    flex-direction: column;
+    /* Default: Top Editors, Bottom Preview */
+}
+
+/* Layout Modes */
+.ce-layout-left .ce-workspace {
+    flex-direction: row;
+}
+
+.ce-layout-right .ce-workspace {
+    flex-direction: row-reverse;
+}
+
+/* Editors Section */
+.ce-editors {
+    display: flex;
+    flex: 1;
+    background: #1e1f26;
+    overflow: hidden;
+    border-bottom: 5px solid #131417;
+}
+
+.ce-layout-left .ce-editors {
+    flex-direction: column;
+    border-bottom: none;
+    border-right: 5px solid #131417;
+    width: 400px;
+    flex: 0 0 400px;
+}
+
+.ce-layout-right .ce-editors {
+    flex-direction: column;
+    border-bottom: none;
+    border-left: 5px solid #131417;
+    width: 400px;
+    flex: 0 0 400px;
+}
+
+.ce-editor-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #2c2d33;
+    min-width: 0;
+    position: relative;
+}
+
+.ce-editor-pane:last-child {
+    border-right: none;
+}
+
+/* Remove side borders in vertical stack mode */
+.ce-layout-left .ce-editor-pane,
+.ce-layout-right .ce-editor-pane {
+    border-right: none;
+    border-bottom: 1px solid #2c2d33;
+}
+
+.ce-pane-header {
+    background: #1e1f26;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #aaadb5;
+    text-transform: uppercase;
+    border-bottom: 1px solid #2c2d33;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ce-pane-header i {
+    margin-right: 6px;
+}
+
+.ce-html-header {
+    color: #ff3c41;
+}
+
+.ce-css-header {
+    color: #0ebeff;
+}
+
+.ce-js-header {
+    color: #fcd000;
+}
+
+.ce-code-area {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    background: #1d1e22;
+    color: #dcdcdc;
+    border: none;
+    resize: none;
+    padding: 10px;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    outline: none;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+}
+
+.ce-code-area:focus {
+    background: #17181c;
+}
+
+/* Preview Section */
+.ce-preview {
+    flex: 1;
+    background: #fff;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.ce-preview-header {
+    background: #fff;
+    color: #333;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-bottom: 1px solid #eee;
+    display: none;
+}
+
+#ce-preview-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #fff;
+}
+
+/* Bookmark Modal */
+.ce-bookmarks-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.ce-bookmark-item {
+    background: #2c2f38;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+}
+
+.ce-bookmark-item:hover {
+    background: #3a3f4b;
+}
+
+.ce-bm-actions i {
+    cursor: pointer;
+    margin-left: 10px;
+    color: #8a8f9c;
+}
+
+/* CodeMirror Overrides */
+.CodeMirror {
+    height: 100% !important;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 14px;
+    background: transparent;
+}
+
+.cm-s-material-darker.CodeMirror {
+    background-color: #1d1e22;
+    color: #c5c8d4;
+}
+
+.CodeMirror-gutters {
+    background: #1d1e22 !important;
+    border-right: 1px solid #2c2d33 !important;
+}
+
+/* Fix for side layout stretching/incomplete display */
+.ce-layout-left .ce-pane-header,
+.ce-layout-right .ce-pane-header {
+    flex-shrink: 0;
+    /* Header shouldn't shrink */
+}
+
+.ce-layout-left .ce-editor-pane,
+.ce-layout-right .ce-editor-pane {
+    height: 33.33%;
+    /* Force equal height in column mode */
+    flex: 0 0 auto;
+    /* Stop flex:1 from messing up if content is large */
+}
+
+/* CodeMirror Scrollbars */
+.CodeMirror-vscrollbar::-webkit-scrollbar,
+.CodeMirror-hscrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb,
+.CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 3px;
+}
+
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb:hover,
+.CodeMirror-hscrollbar::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}

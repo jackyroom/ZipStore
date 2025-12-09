@@ -9,12 +9,39 @@
 /* Sidebar Styling */
 .plugin-sidebar {
     width: 260px;
-    background: #0f172a;
     /* Darker sidebar */
     display: flex;
     flex-direction: column;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
     padding: 30px 20px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* Fullscreen Modal Helper */
+.modal-content.fullscreen-mode {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    border-radius: 0 !important;
+    border: none !important;
 }
 
 .ps-header h2 {

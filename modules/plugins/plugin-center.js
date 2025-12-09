@@ -5,6 +5,22 @@
 
 const PLUGIN_CATALOG = [
     {
+        id: 'code-editor',
+        name: '代码在线编辑',
+        desc: 'HTML/CSS/JS 在线编辑与实时预览，支持代码保存与多视图切换。',
+        version: '1.0.0',
+        author: 'ZipStore Team',
+        downloads: '0',
+        category: 'coding',
+        iconType: 'text',
+        iconVal: '💻',
+        installed: true,
+        status: 'published',
+        changelog: [
+            { ver: '1.0.0', date: '2025-03-22', note: '仿 CodePen 风格在线编辑器发布。' }
+        ]
+    },
+    {
         id: 'image-cropper',
         name: '批量图片裁切',
         desc: '支持多图批量裁切、缩放及自定义比例导出。',
@@ -122,6 +138,11 @@ const PLUGIN_CATALOG = [
 
 // 2. 插件实现映射表 (映射到独立的插件文件)
 const PluginImplMap = {
+    'code-editor': {
+        js: '/modules/plugins/plugins/code-editor/code-editor.js',
+        css: '/modules/plugins/plugins/code-editor/code-editor.css',
+        render: 'CodeEditor'
+    },
     'batch-renamer': {
         js: '/modules/plugins/plugins/batch-renamer.js',
         css: '/modules/plugins/plugins/batch-renamer.css',
@@ -606,6 +627,44 @@ const PluginApp = {
         if (!modal || !title || !body) return;
 
         title.innerText = p.name;
+        // Reset fullscreen state logic (optional, or keep if user prefers persistence)
+        modal.querySelector('.modal-content').classList.remove('fullscreen-mode');
+
+        // Ensure fullscreen button exists
+        let fsBtn = document.getElementById('runner-fs-btn');
+        if (!fsBtn) {
+            // Inject dynamically if not present in static HTML (assuming static HTML has a header container)
+            // Or better, we assume the HTML structure allows us to append.
+            // Let's rely on modifying the index.html or injecting it if missing.
+            // For this specific environment, we will inject it into the header actions if we can find them.
+            // But looking at previous files, I don't see the runner markup.
+            // I will assume standard structure or inject into the header title area for now.
+            const header = modal.querySelector('.modal-header');
+            if (header) {
+                // Check if actions container exists
+                let actions = header.querySelector('.modal-actions');
+                if (!actions) {
+                    actions = document.createElement('div');
+                    actions.className = 'modal-actions';
+                    actions.style.display = 'flex';
+                    actions.style.gap = '10px';
+                    // Move close button into actions if it exists separately
+                    const closeBtn = header.querySelector('.close-btn');
+                    if (closeBtn) actions.appendChild(closeBtn);
+                    header.appendChild(actions);
+                }
+
+                // Add fullscreen button
+                fsBtn = document.createElement('button');
+                fsBtn.id = 'runner-fs-btn';
+                fsBtn.className = 'close-btn'; // reuse style
+                fsBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
+                fsBtn.onclick = () => pluginApp.toggleFullscreen();
+                // Insert before close button
+                actions.insertBefore(fsBtn, actions.firstChild);
+            }
+        }
+
         body.innerHTML = '<div class="plugin-loading"><i class="fa-solid fa-spinner fa-spin"></i> 加载插件中...</div>';
         modal.style.display = 'flex';
 
@@ -622,6 +681,15 @@ const PluginApp = {
 
     closeRunner: function () {
         document.getElementById('plugin-runner-modal').style.display = 'none';
+        document.querySelector('#plugin-runner-modal .modal-content').classList.remove('fullscreen-mode');
+    },
+
+    toggleFullscreen: function () {
+        const content = document.querySelector('#plugin-runner-modal .modal-content');
+        content.classList.toggle('fullscreen-mode');
+        const isFs = content.classList.contains('fullscreen-mode');
+        const btn = document.getElementById('runner-fs-btn');
+        if (btn) btn.innerHTML = isFs ? '<i class="fa-solid fa-compress"></i>' : '<i class="fa-solid fa-expand"></i>';
     },
 
     showUpdates: function () {
