@@ -1,0 +1,669 @@
+/* Zip Memo V7 CSS - Precision & Colors */
+.zm-app-v5 {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    background: #ffffff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: #37352f;
+    overflow: hidden;
+}
+
+/* Sidebar */
+.zm-sidebar {
+    width: 240px;
+    background: #fbfbfa;
+    border-right: 1px solid #edede8;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    flex-shrink: 0;
+}
+
+.zm-brand {
+    font-weight: 700;
+    font-size: 16px;
+    color: #37352f;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 8px;
+}
+
+.zm-sidebar-menu {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.zm-menu-item {
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #5f5e5b;
+    transition: background 0.1s;
+}
+
+.zm-menu-item:hover {
+    background: #edede8;
+}
+
+.zm-menu-item.active {
+    background: #e6e6e4;
+    color: #37352f;
+    font-weight: 600;
+}
+
+/* Main Area */
+.zm-main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    background: #fff;
+}
+
+/* Context Menu */
+.zm-context-menu {
+    position: fixed;
+    z-index: 10010;
+    min-width: 160px;
+    background: white;
+    border: 1px solid #edede8;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 6px 0;
+    display: none;
+    flex-direction: column;
+}
+
+.zm-context-menu button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    color: #37352f;
+    transition: background 0.1s;
+}
+
+.zm-context-menu button:hover {
+    background: #f0f0ef;
+}
+
+.zm-context-menu button i {
+    width: 16px;
+    text-align: center;
+    color: #9b9a97;
+}
+
+.zm-context-menu button.text-danger {
+    color: #e03131;
+}
+
+.zm-context-menu button.text-danger i {
+    color: #e03131;
+}
+
+.zm-cm-divider {
+    height: 1px;
+    background: #edede8;
+    margin: 4px 0;
+}
+
+/* List View */
+.zm-list-header {
+    padding: 24px 32px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.zm-list-tools input {
+    padding: 8px 12px;
+    border: 1px solid #edede8;
+    border-radius: 6px;
+    outline: none;
+    font-size: 14px;
+    width: 240px;
+    transition: width 0.2s, border-color 0.2s, box-shadow 0.2s;
+    background: #fbfbfa;
+}
+
+.zm-list-tools input:focus {
+    width: 280px;
+    border-color: #d3d3d3;
+    background: white;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.03);
+}
+
+.zm-list-grid {
+    flex: 1;
+    padding: 32px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    align-content: start;
+}
+
+/* Note Card */
+.zm-note-card {
+    border: 1px solid #edede8;
+    border-radius: 8px;
+    padding: 16px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    cursor: grab;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    height: 160px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.zm-note-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+    border-color: #e0e0e0;
+}
+
+.zm-note-card.dragging {
+    opacity: 0.5;
+    border: 2px dashed #999;
+    box-shadow: none;
+    cursor: grabbing;
+    transform: rotate(2deg);
+}
+
+/* New Page Card */
+.zm-note-card.new-page-card {
+    background: transparent;
+    border: 1px dashed #d3d3d3;
+    box-shadow: none;
+    justify-content: center;
+    align-items: center;
+    color: #9b9a97;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.zm-note-card.new-page-card:hover {
+    background: #fbfbfa;
+    border-color: #9b9a97;
+    color: #37352f;
+    transform: translateY(-2px);
+}
+
+.zm-note-card.new-page-card i {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.zm-note-card.new-page-card span {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Card Contents */
+.zm-nc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.zm-nc-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: #37352f;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.active-pin {
+    color: #e03131;
+    transform: rotate(45deg);
+}
+
+.zm-nc-preview {
+    font-size: 13px;
+    color: #787774;
+    line-height: 1.6;
+    flex: 1;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.zm-nc-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f7f7f5;
+    padding-top: 10px;
+}
+
+.zm-nc-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+}
+
+.zm-status-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    white-space: nowrap;
+}
+
+.zm-status-badge.active {
+    background: #e3fadc;
+    color: #2b8a3e;
+}
+
+.zm-status-badge.done {
+    background: #f1f3f5;
+    color: #868e96;
+    text-decoration: line-through;
+}
+
+.zm-nc-tags {
+    display: flex;
+    gap: 4px;
+    overflow: hidden;
+}
+
+.zm-tag {
+    background: #f0f0ef;
+    color: #5f5e5b;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.zm-nc-date {
+    font-size: 11px;
+    color: #9b9a97;
+    white-space: nowrap;
+}
+
+.zm-nc-hover-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: none;
+    gap: 8px;
+}
+
+/* Editor View Logic (Mirror Div & Textarea) */
+.zm-content-textarea,
+.zm-mirror-div {
+    font-family: 'Fira Code', 'Menlo', monospace;
+    font-size: 16px;
+    line-height: 1.65;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #37352f;
+    margin: 0;
+}
+
+.zm-content-textarea {
+    resize: none;
+    overflow-y: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 2;
+    padding-bottom: 180px; /* 防止末行被遮挡，同时减小多余空白 */
+}
+
+.zm-mirror-div {
+    visibility: hidden;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    overflow: hidden; /* 隐藏自身滚动条，仅用于测量 */
+    padding-bottom: 180px;
+}
+
+.zm-editor-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.zm-editor-header {
+    height: 52px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    background: white;
+}
+
+.zm-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    color: #374151;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.zm-btn-ghost:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    color: #111827;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.zm-btn-ghost:active {
+    transform: translateY(1px);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.zm-btn-ghost i {
+    font-size: 13px;
+}
+
+.zm-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.zm-header-status {
+    cursor: pointer;
+}
+
+.status-pill {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.status-pill.active {
+    background: #e3fadc;
+    color: #2b8a3e;
+}
+
+.status-pill.done {
+    background: #f1f3f5;
+    color: #868e96;
+}
+
+.zm-view-switcher {
+    background: #f0f0ef;
+    padding: 2px;
+    border-radius: 6px;
+    display: flex;
+}
+
+.zm-view-switcher button {
+    border: none;
+    background: none;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: #5f5e5b;
+    cursor: pointer;
+}
+
+.zm-view-switcher button.active {
+    background: white;
+    color: #37352f;
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.zm-header-actions button {
+    background: none;
+    border: none;
+    padding: 8px;
+    color: #9b9a97;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.zm-header-actions button:hover {
+    color: #37352f;
+}
+
+/* Top Toolbar */
+.zm-top-toolbar {
+    height: 44px;
+    border-top: 1px solid #edede8;
+    border-bottom: 1px solid #edede8;
+    background: #fbfbfa;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 6px;
+}
+
+.zm-top-toolbar button {
+    background: transparent;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #5f5e5b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zm-top-toolbar button:hover {
+    background: #e6e6e4;
+    color: #37352f;
+}
+
+.zm-format-select {
+    border: none;
+    background: transparent;
+}
+
+.zm-tt-divider {
+    width: 1px;
+    height: 16px;
+    background: #edede8;
+    margin: 0 6px;
+}
+
+/* Workspace */
+.zm-editor-workspace {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+    background: #fff;
+}
+
+.zm-editor-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: 60px;
+    min-height: 0; /* 避免子元素挤出导致多重滚动条 */
+}
+
+.source-pane {
+    background: #fcfcfc;
+    border-right: 1px solid #f0f0f0;
+    padding: 20px 30px;
+    overflow: hidden; /* 交给 textarea 自身滚动，避免双滚动条 */
+}
+
+.preview-pane {
+    background: #fff;
+    padding: 20px 40px;
+    overflow-y: auto; /* 预览保持单一滚动条 */
+}
+
+.zm-title-field,
+.zm-preview-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    border: none;
+    outline: none;
+    width: 100%;
+    background: transparent;
+}
+
+.zm-tags-input-area {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    color: #9b9a97;
+}
+
+.zm-tags-input-area input {
+    border: none;
+    outline: none;
+    background: transparent;
+    flex: 1;
+    font-family: inherit;
+}
+
+.zm-editor-footer {
+    padding-top: 20px;
+    color: #9b9a97;
+    font-size: 12px;
+    margin-top: auto;
+    z-index: 3;
+    position: relative;
+}
+
+.zm-preview-tags {
+    margin-bottom: 24px;
+    display: flex;
+    gap: 6px;
+}
+
+/* Modes */
+.mode-edit .preview-pane {
+    display: none;
+}
+
+.mode-edit .source-pane {
+    max-width: 900px;
+    margin: 0 auto;
+    border: none;
+}
+
+.mode-preview .source-pane {
+    display: none;
+}
+
+.mode-preview .preview-pane {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Floating Toolbar (Enhanced) */
+.zm-floating-toolbar {
+    position: fixed;
+    z-index: 10002;
+    background: #fff;
+    border: 1px solid #edede8;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    animation: fadeIn 0.15s ease-out;
+}
+
+.zm-ft-group {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+}
+
+.zm-floating-toolbar button {
+    background: transparent;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #37352f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zm-floating-toolbar button:hover {
+    background: #f0f0ef;
+}
+
+.zm-color-picker-label {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #37352f;
+    position: relative;
+    overflow: hidden;
+}
+
+.zm-color-picker-label:hover {
+    background: #f0f0ef;
+}
+
+.zm-ft-divider {
+    width: 1px;
+    height: 18px;
+    background: #edede8;
+    margin: 0 4px;
+}

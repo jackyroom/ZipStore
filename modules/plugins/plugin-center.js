@@ -21,6 +21,22 @@ const PLUGIN_CATALOG = [
         ]
     },
     {
+        id: 'zip-memo',
+        name: 'Zip 备忘录',
+        desc: '类似于手机备忘录，支持Markdown、Todo、多媒体插入的可爱风格笔记应用。',
+        version: '1.0.0',
+        author: 'ZipStore Team',
+        downloads: '0',
+        category: 'efficiency',
+        iconType: 'text',
+        iconVal: '📝',
+        installed: true,
+        status: 'published',
+        changelog: [
+            { ver: '1.0.0', date: '2025-12-09', note: '初始版本发布。' }
+        ]
+    },
+    {
         id: 'image-cropper',
         name: '批量图片裁切',
         desc: '支持多图批量裁切、缩放及自定义比例导出。',
@@ -143,29 +159,34 @@ const PluginImplMap = {
         css: '/modules/plugins/plugins/code-editor/code-editor.css',
         render: 'CodeEditor'
     },
+    'zip-memo': {
+        js: '/modules/plugins/plugins/zip-memo/zip-memo.js',
+        css: '/modules/plugins/plugins/zip-memo/zip-memo.css',
+        render: 'ZipMemo'
+    },
     'batch-renamer': {
-        js: '/modules/plugins/plugins/batch-renamer.js',
-        css: '/modules/plugins/plugins/batch-renamer.css',
+        js: '/modules/plugins/plugins/batch-renamer/batch-renamer.js',
+        css: '/modules/plugins/plugins/batch-renamer/batch-renamer.css',
         render: 'BatchRenamer'
     },
     'image-compressor': {
-        js: '/modules/plugins/plugins/image-compressor.js',
-        css: '/modules/plugins/plugins/image-compressor.css',
+        js: '/modules/plugins/plugins/image-compressor/image-compressor.js',
+        css: '/modules/plugins/plugins/image-compressor/image-compressor.css',
         render: 'ImageCompressor'
     },
     'image-cropper': {
-        js: '/modules/plugins/plugins/image-cropper.js',
-        css: '/modules/plugins/plugins/image-cropper.css',
+        js: '/modules/plugins/plugins/image-cropper/image-cropper.js',
+        css: '/modules/plugins/plugins/image-cropper/image-cropper.css',
         render: 'ImageCropper'
     },
     'pomodoro-timer': {
-        js: '/modules/plugins/plugins/pomodoro-timer.js',
-        css: '/modules/plugins/plugins/pomodoro-timer.css',
+        js: '/modules/plugins/plugins/pomodoro-timer/pomodoro-timer.js',
+        css: '/modules/plugins/plugins/pomodoro-timer/pomodoro-timer.css',
         render: 'PomodoroTimer'
     },
     'theme-switcher': {
-        js: '/modules/plugins/plugins/theme-switcher.js',
-        css: '/modules/plugins/plugins/theme-switcher.css',
+        js: '/modules/plugins/plugins/theme-switcher/theme-switcher.js',
+        css: '/modules/plugins/plugins/theme-switcher/theme-switcher.css',
         render: 'ThemeSwitcher'
     }
 };
@@ -761,10 +782,18 @@ const PluginApp = {
 };
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
+(function initPluginCenter() {
     window.pluginApp = PluginApp; // Global exposure
-    PluginApp.init();
-});
+    
+    // 参考其他模块的初始化方式（如 website/index.js）
+    document.addEventListener('DOMContentLoaded', () => {
+        PluginApp.init();
+    });
+    // 同时也尝试直接运行，防止DOMContentLoaded已过
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        PluginApp.init();
+    }
+})();
 
 // 检查并应用之前保存的主题 (Theme Switcher 插件的持久化效果)
 (function applySavedTheme() {
