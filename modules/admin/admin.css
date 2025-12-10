@@ -231,8 +231,6 @@ body.admin-body {
     /* Remove blur for this specific flat design, or keep it subtle */
     backdrop-filter: none;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    margin: 0 auto;
 }
 
 h1,
