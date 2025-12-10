@@ -1,7 +1,85 @@
 const { render } = require('../../core/layout-engine');
+const db = require('../../core/db-access');
 
-// 1. 扩展软件工具资源数据
-const SOFTWARE_RESOURCES = [
+// 从数据库获取软件资源数据
+async function getSoftwareData() {
+    try {
+        // 查询所有软件工具模块的分类（module_id='software'）
+        const categories = await db.query("SELECT id FROM categories WHERE module_id = 'software'");
+        if (!categories || categories.length === 0) return [];
+        
+        const categoryIds = categories.map(c => c.id);
+
+        const resources = await db.query(`
+            SELECT r.*, c.name as category_name,
+                   u.username as author,
+                   a.file_path as cover_path
+            FROM resources r
+            LEFT JOIN categories c ON r.category_id = c.id
+            LEFT JOIN users u ON r.author_id = u.id
+            LEFT JOIN assets a ON r.cover_asset_id = a.id
+            WHERE r.category_id IN (${categoryIds.map(() => '?').join(',')}) AND r.status = 'published'
+            ORDER BY r.created_at DESC
+        `, categoryIds);
+
+        return resources.map(r => {
+            const attrs = r.attributes ? JSON.parse(r.attributes) : {};
+            
+            // 解析历史版本（支持字符串和数组格式）
+            let historyVersions = [];
+            if (attrs.history_versions) {
+                if (typeof attrs.history_versions === 'string') {
+                    try {
+                        historyVersions = JSON.parse(attrs.history_versions);
+                    } catch (e) {
+                        console.warn('解析历史版本失败:', e);
+                    }
+                } else if (Array.isArray(attrs.history_versions)) {
+                    historyVersions = attrs.history_versions;
+                }
+            }
+            
+            // 如果没有历史版本，但当前版本存在，则创建一个默认版本
+            if (historyVersions.length === 0 && attrs.version) {
+                historyVersions = [{
+                    ver: attrs.version,
+                    date: new Date(r.created_at).toISOString().split('T')[0],
+                    size: attrs.size || 'N/A',
+                    link: attrs.download_link || `/admin/api/download/${r.id}`
+                }];
+            }
+            
+            return {
+                id: r.id,
+                title: r.title,
+                author: r.author || 'Unknown',
+                thumb: r.cover_path || 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=600&q=80',
+                platform: attrs.platform || 'Windows / macOS',
+                version: attrs.version || '1.0.0',
+                size: attrs.size || 'N/A',
+                downloads: r.downloads || 0,
+                views: r.views || 0,
+                category: attrs.category || '软件工具',
+                license: attrs.license || '商业',
+                description: r.description || '',
+                tutorial: attrs.tutorial || r.content_body || '直接安装即可。',
+                download_link: attrs.download_link || `/admin/api/download/${r.id}`,
+                history_versions: historyVersions
+            };
+        });
+    } catch (error) {
+        console.error('获取软件资源数据失败:', error);
+        return [];
+    }
+}
+
+// 格式化数字
+function formatNumber(num) {
+    return num > 999 ? (num/1000).toFixed(1) + 'k' : num;
+}
+
+// 1. 扩展软件工具资源数据（保留作为fallback）
+const SOFTWARE_RESOURCES_FALLBACK = [
     {
         id: 1,
         title: "Adobe Creative Suite 2024",
@@ -117,7 +195,9 @@ const SOFTWARE_RESOURCES = [
 ];
 
 // 渲染函数
-function renderSoftwarePage() {
+async function renderSoftwarePage() {
+    const SOFTWARE_RESOURCES = await getSoftwareData();
+    
     return `
     <div class="software-module-container">
         <div class="software-toolbar">
@@ -199,7 +279,7 @@ function renderSoftwarePage() {
         </div>
 
         <script>
-            const SOFT_DATA = ${JSON.stringify(SOFTWARE_RESOURCES)};
+            const SOFT_DATA = ${JSON.stringify(SOFTWARE_RESOURCES || [])};
 
             const SoftwareApp = {
                 init: function() {
@@ -233,29 +313,35 @@ function renderSoftwarePage() {
                     document.getElementById('sTutorial').innerText = item.tutorial || "直接安装即可。";
 
                     const verList = document.getElementById('sVersionList');
-                    if (item.history_versions && item.history_versions.length > 0) {
-                        verList.innerHTML = item.history_versions.map(v => \`
-                            <div class="version-item">
-                                <div class="v-info">
-                                    <span class="v-num">v\${v.ver}</span>
-                                    <span class="v-date">\${v.date}</span>
-                                </div>
-                                <div class="v-action">
-                                    <span class="v-size">\${v.size}</span>
-                                    <a href="\${v.link}" class="v-btn" onclick="alert('开始下载 \${item.title} v\${v.ver}')">下载</a>
-                                </div>
-                            </div>
-                        \`).join('');
+                    if (item.history_versions && Array.isArray(item.history_versions) && item.history_versions.length > 0) {
+                        verList.innerHTML = item.history_versions.map(v => {
+                            const link = v.link && v.link !== '#' ? v.link : (item.download_link || '/admin/api/download/' + item.id);
+                            const ver = v.ver || item.version;
+                            const date = v.date || 'N/A';
+                            const size = v.size || item.size;
+                            return '<div class="version-item">' +
+                                '<div class="v-info">' +
+                                    '<span class="v-num">v' + ver + '</span>' +
+                                    '<span class="v-date">' + date + '</span>' +
+                                '</div>' +
+                                '<div class="v-action">' +
+                                    '<span class="v-size">' + size + '</span>' +
+                                    '<a href="' + link + '" class="v-btn" target="_blank" onclick="SoftwareApp.handleDownload(' + item.id + ', \\'' + ver + '\\')">下载</a>' +
+                                '</div>' +
+                            '</div>';
+                        }).join('');
                     } else {
-                         verList.innerHTML = \`
-                            <div class="version-item">
-                                <div class="v-info"><span class="v-num">v\${item.version}</span></div>
-                                <div class="v-action">
-                                    <span class="v-size">\${item.size}</span>
-                                    <a href="#" class="v-btn" onclick="alert('开始下载')">下载</a>
-                                </div>
-                            </div>
-                        \`;
+                         const downloadLink = item.download_link || '/admin/api/download/' + item.id;
+                         verList.innerHTML = '<div class="version-item">' +
+                            '<div class="v-info">' +
+                                '<span class="v-num">v' + item.version + '</span>' +
+                                '<span class="v-date">当前版本</span>' +
+                            '</div>' +
+                            '<div class="v-action">' +
+                                '<span class="v-size">' + item.size + '</span>' +
+                                '<a href="' + downloadLink + '" class="v-btn" target="_blank" onclick="SoftwareApp.handleDownload(' + item.id + ', \\'' + item.version + '\\')">下载</a>' +
+                            '</div>' +
+                        '</div>';
                     }
 
                     document.getElementById('softDetailModal').classList.add('active');
@@ -263,6 +349,17 @@ function renderSoftwarePage() {
 
                 closeModal: function() {
                     document.getElementById('softDetailModal').classList.remove('active');
+                },
+                
+                handleDownload: function(resourceId, version) {
+                    // 更新下载量（使用admin的下载API）
+                    fetch('/admin/api/download/' + resourceId, { method: 'GET' })
+                        .then(function() {
+                            // 刷新页面数据（可选）
+                            const item = SOFT_DATA.find(function(d) { return d.id == resourceId; });
+                            if (item) item.downloads = (item.downloads || 0) + 1;
+                        })
+                        .catch(function(err) { console.warn('更新下载量失败:', err); });
                 }
             };
 
@@ -320,13 +417,80 @@ module.exports = {
         {
             method: 'GET',
             path: '/',
-            handler: (req, res) => {
-                const content = renderSoftwarePage();
+            handler: async (req, res) => {
+                const content = await renderSoftwarePage();
                 res.send(render({ 
                     title: '软件工具 - JackyRoom', 
                     content: content, 
                     currentModule: 'software',
                     extraHead: '<link rel="stylesheet" href="/modules/software/software.css">'
+                }));
+            }
+        },
+        {
+            method: 'GET',
+            path: '/view/:id',
+            handler: async (req, res) => {
+                const resourceId = req.params.id;
+                
+                // 更新浏览量
+                await db.run("UPDATE resources SET views = views + 1 WHERE id = ?", [resourceId]);
+                
+                const resource = await db.get(`
+                    SELECT r.*, c.name as category_name,
+                           u.username as author, u.avatar as author_avatar,
+                           a.file_path as cover_path
+                    FROM resources r
+                    LEFT JOIN categories c ON r.category_id = c.id
+                    LEFT JOIN users u ON r.author_id = u.id
+                    LEFT JOIN assets a ON r.cover_asset_id = a.id
+                    WHERE r.id = ? AND r.status = 'published'
+                `, [resourceId]);
+
+                if (!resource) {
+                    return res.status(404).send('资源不存在');
+                }
+
+                const attrs = resource.attributes ? JSON.parse(resource.attributes) : {};
+                
+                const content = `
+                    <link rel="stylesheet" href="/modules/software/software.css">
+                    <div class="glass-card" style="max-width: 1200px; margin: 0 auto;">
+                        <div style="margin-bottom: 20px;">
+                            <a href="/software" style="color: var(--text-muted); text-decoration: none;">
+                                <i class="fa-solid fa-arrow-left"></i> 返回列表
+                            </a>
+                        </div>
+                        ${resource.cover_path ? `<img src="${resource.cover_path}" style="width:100%; border-radius:12px; margin-bottom:20px;">` : ''}
+                        <h1 style="margin-bottom: 10px;">${resource.title}</h1>
+                        <div style="color: var(--text-muted); margin-bottom: 20px;">
+                            作者: ${resource.author || 'Unknown'} • 
+                            版本: ${attrs.version || 'N/A'} • 
+                            浏览: ${resource.views || 0} • 
+                            下载: ${resource.downloads || 0}
+                        </div>
+                        ${resource.description ? `<p style="line-height:1.8; margin-bottom:20px;">${resource.description}</p>` : ''}
+                        ${resource.content_body ? `<div style="line-height:1.8; margin-bottom:20px; white-space:pre-wrap;">${resource.content_body}</div>` : ''}
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:20px;">
+                            ${attrs.platform ? `<div class="glass-card stat-card">
+                                <div style="color:var(--text-muted); font-size:0.9rem; margin-bottom:5px;">平台</div>
+                                <div style="font-weight:bold;">${attrs.platform}</div>
+                            </div>` : ''}
+                            ${attrs.size ? `<div class="glass-card stat-card">
+                                <div style="color:var(--text-muted); font-size:0.9rem; margin-bottom:5px;">大小</div>
+                                <div style="font-weight:bold;">${attrs.size}</div>
+                            </div>` : ''}
+                            ${attrs.license ? `<div class="glass-card stat-card">
+                                <div style="color:var(--text-muted); font-size:0.9rem; margin-bottom:5px;">授权</div>
+                                <div style="font-weight:bold;">${attrs.license}</div>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                `;
+                res.send(render({ 
+                    title: resource.title + ' - 软件工具', 
+                    content: content, 
+                    currentModule: 'software'
                 }));
             }
         }

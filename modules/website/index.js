@@ -1,84 +1,44 @@
 const { render } = require('../../core/layout-engine');
+const db = require('../../core/db-access');
 
-// 1. 网站导航数据配置
-const WEBSITE_DATA = [
-    {
-        id: 'design',
-        name: '设计灵感',
-        icon: 'fa-solid fa-palette',
-        sites: [
-            { name: 'Pinterest', url: 'https://www.pinterest.com/', desc: '全球最大的创意灵感图片分享社区' },
-            { name: 'Behance', url: 'https://www.behance.net/', desc: 'Adobe旗下的设计师作品展示平台' },
-            { name: 'Dribbble', url: 'https://dribbble.com/', desc: 'UI设计师的灵感加油站' },
-            { name: 'ArtStation', url: 'https://www.artstation.com/', desc: '专业的CG艺术家作品展示平台' },
-            { name: 'Huaban', url: 'https://huaban.com/', desc: '花瓣网，设计师寻找灵感的天堂' },
-            { name: 'Mobbin', url: 'https://mobbin.com/', desc: '最新移动端App UI设计模式集合' }
-        ]
-    },
-    {
-        id: 'dev',
-        name: '开发资源',
-        icon: 'fa-solid fa-code',
-        sites: [
-            { name: 'GitHub', url: 'https://github.com/', desc: '全球最大的代码托管与开源社区' },
-            { name: 'Stack Overflow', url: 'https://stackoverflow.com/', desc: '全球程序员问答社区' },
-            { name: 'MDN Web Docs', url: 'https://developer.mozilla.org/', desc: 'Web开发技术的权威文档' },
-            { name: 'DevDocs', url: 'https://devdocs.io/', desc: '快速、离线、整合的API文档浏览器' },
-            { name: 'Can I Use', url: 'https://caniuse.com/', desc: '前端浏览器兼容性查询工具' },
-            { name: 'NPM', url: 'https://www.npmjs.com/', desc: 'Node.js 包管理器官网' }
-        ]
-    },
-    {
-        id: 'tools',
-        name: '在线工具',
-        icon: 'fa-solid fa-toolbox',
-        sites: [
-            { name: 'TinyPNG', url: 'https://tinypng.com/', desc: '智能压缩WebP、PNG和JPEG图片' },
-            { name: 'Carbon', url: 'https://carbon.now.sh/', desc: '生成漂亮的代码图片分享工具' },
-            { name: 'Excalidraw', url: 'https://excalidraw.com/', desc: '虚拟手绘风格的在线白板' },
-            { name: 'Remove.bg', url: 'https://www.remove.bg/', desc: 'AI自动去除图片背景' },
-            { name: 'Convertio', url: 'https://convertio.co/', desc: '强大的在线文件格式转换工具' },
-            { name: 'Regex101', url: 'https://regex101.com/', desc: '在线正则表达式测试与调试' }
-        ]
-    },
-    {
-        id: 'assets',
-        name: '素材资源',
-        icon: 'fa-solid fa-cube',
-        sites: [
-            { name: 'Unsplash', url: 'https://unsplash.com/', desc: '高质量免费无版权图片素材' },
-            { name: 'Pexels', url: 'https://www.pexels.com/', desc: '免费素材图片和视频分享' },
-            { name: 'Flaticon', url: 'https://www.flaticon.com/', desc: '最大的免费矢量图标数据库' },
-            { name: 'Sketchfab', url: 'https://sketchfab.com/', desc: '发布和寻找3D模型的平台' },
-            { name: 'Poly Haven', url: 'https://polyhaven.com/', desc: '免费的高质量3D纹理、模型和HDRI' }
-        ]
-    },
-    {
-        id: 'ai',
-        name: 'AI 工具',
-        icon: 'fa-solid fa-robot',
-        sites: [
-            { name: 'ChatGPT', url: 'https://chat.openai.com/', desc: 'OpenAI 推出的革命性对话AI' },
-            { name: 'Midjourney', url: 'https://www.midjourney.com/', desc: 'AI 艺术图片生成工具' },
-            { name: 'Notion AI', url: 'https://www.notion.so/', desc: '集成在笔记软件中的智能写作助手' },
-            { name: 'Runway', url: 'https://runwayml.com/', desc: 'AI 视频编辑与生成工具' }
-        ]
-    },
-    {
-        id: 'learning',
-        name: '学习教育',
-        icon: 'fa-solid fa-graduation-cap',
-        sites: [
-            { name: 'Coursera', url: 'https://www.coursera.org/', desc: '世界顶级大学的在线课程' },
-            { name: 'Udemy', url: 'https://www.udemy.com/', desc: '全球最大的在线学习平台' },
-            { name: 'Bilibili', url: 'https://www.bilibili.com/', desc: '国内知名的视频弹幕网站，学习资源丰富' },
-            { name: 'TED', url: 'https://www.ted.com/', desc: '传播有价值思想的演讲视频' }
-        ]
+// 1. 从数据库获取网站导航数据
+async function getWebsiteData() {
+    try {
+        const categories = await db.query(`
+            SELECT wc.*, 
+                   (SELECT COUNT(*) FROM website_sites WHERE category_id = wc.id) as site_count
+            FROM website_categories wc
+            ORDER BY wc.sort_order ASC, wc.id ASC
+        `);
+        
+        const result = [];
+        for (const cat of categories) {
+            const sites = await db.query(
+                "SELECT * FROM website_sites WHERE category_id = ? ORDER BY sort_order ASC, id ASC",
+                [cat.id]
+            );
+            result.push({
+                id: `cat-${cat.id}`,
+                name: cat.name,
+                icon: cat.icon || 'fa-solid fa-folder',
+                sites: sites.map(s => ({
+                    name: s.name,
+                    url: s.url,
+                    desc: s.desc || ''
+                }))
+            });
+        }
+        
+        return result;
+    } catch (error) {
+        console.error('获取网站目录数据失败:', error);
+        return [];
     }
-];
+}
 
 // 2. 页面渲染逻辑
-function renderWebsitePage() {
+async function renderWebsitePage() {
+    const WEBSITE_DATA = await getWebsiteData();
     // 生成侧边栏导航 HTML
     const sidebarHtml = WEBSITE_DATA.map((cat, index) => `
         <a href="#${cat.id}" class="web-nav-item ${index === 0 ? 'active' : ''}" data-target="${cat.id}">
@@ -259,8 +219,8 @@ module.exports = {
         {
             method: 'GET',
             path: '/',
-            handler: (req, res) => {
-                const content = renderWebsitePage();
+            handler: async (req, res) => {
+                const content = await renderWebsitePage();
                 res.send(render({ 
                     title: '网站目录 - JackyRoom', 
                     content: content, 

@@ -1,8 +1,49 @@
 const path = require('path');
 const { render } = require('../../core/layout-engine');
+const db = require('../../core/db-access');
 
-// 1. 模拟资源数据
-const ASSETS = [
+// 从数据库获取资源数据
+async function getAssetsData() {
+    try {
+        const category = await db.get("SELECT id FROM categories WHERE slug = 'design-assets'");
+        if (!category) return [];
+
+        const resources = await db.query(`
+            SELECT r.*, c.name as category_name,
+                   u.username as author,
+                   a.file_path as cover_path
+            FROM resources r
+            LEFT JOIN categories c ON r.category_id = c.id
+            LEFT JOIN users u ON r.author_id = u.id
+            LEFT JOIN assets a ON r.cover_asset_id = a.id
+            WHERE r.category_id = ? AND r.status = 'published'
+            ORDER BY r.created_at DESC
+        `, [category.id]);
+
+        return resources.map(r => {
+            const attrs = r.attributes ? JSON.parse(r.attributes) : {};
+            return {
+                id: r.id,
+                title: r.title,
+                author: r.author || 'Unknown',
+                points: attrs.points || 0,
+                type: attrs.type || '3d',
+                software: attrs.software ? (Array.isArray(attrs.software) ? attrs.software : [attrs.software]) : ['Universal'],
+                format: attrs.format || 'N/A',
+                size: attrs.size || 'N/A',
+                thumb: r.cover_path || 'https://images.unsplash.com/photo-1605806616949-1e87b487bc2a?w=600&q=80',
+                desc: r.description || '',
+                rating: attrs.rating || 4.5
+            };
+        });
+    } catch (error) {
+        console.error('获取设计素材数据失败:', error);
+        return [];
+    }
+}
+
+// 1. 模拟资源数据（保留作为fallback）
+const ASSETS_FALLBACK = [
     {
         id: 1,
         title: "赛博朋克贫民窟组件包",
@@ -131,7 +172,9 @@ const CATEGORIES = [
     { id: '2d', name: '2D 素材' }
 ];
 
-function renderPage() {
+async function renderPage() {
+    const ASSETS = await getAssetsData();
+    
     return `
     <div class="design-assets-module-container">
         <!-- 顶部栏 -->
@@ -256,7 +299,7 @@ function renderPage() {
         </div>
 
         <script>
-            const DATA = ${JSON.stringify(ASSETS)};
+            const DATA = ${JSON.stringify(ASSETS || [])};
             
             const ResApp = {
                 // 模拟过滤
@@ -392,13 +435,84 @@ module.exports = {
         {
             method: 'GET',
             path: '/',
-            handler: (req, res) => {
-                const content = renderPage();
+            handler: async (req, res) => {
+                const content = await renderPage();
                 res.send(render({
                     title: '设计素材 - JackyRoom',
                     content: content,
                     currentModule: 'design-assets',
                     extraHead: '<link rel="stylesheet" href="/modules/design-assets/design-assets.css">'
+                }));
+            }
+        },
+        {
+            method: 'GET',
+            path: '/view/:id',
+            handler: async (req, res) => {
+                const resourceId = req.params.id;
+                
+                // 更新浏览量
+                await db.run("UPDATE resources SET views = views + 1 WHERE id = ?", [resourceId]);
+                
+                const resource = await db.get(`
+                    SELECT r.*, c.name as category_name,
+                           u.username as author, u.avatar as author_avatar,
+                           a.file_path as cover_path
+                    FROM resources r
+                    LEFT JOIN categories c ON r.category_id = c.id
+                    LEFT JOIN users u ON r.author_id = u.id
+                    LEFT JOIN assets a ON r.cover_asset_id = a.id
+                    WHERE r.id = ? AND r.status = 'published'
+                `, [resourceId]);
+
+                if (!resource) {
+                    return res.status(404).send('资源不存在');
+                }
+
+                const attrs = resource.attributes ? JSON.parse(resource.attributes) : {};
+                
+                const content = `
+                    <link rel="stylesheet" href="/modules/design-assets/design-assets.css">
+                    <div class="glass-card" style="max-width: 1200px; margin: 0 auto;">
+                        <div style="margin-bottom: 20px;">
+                            <a href="/design-assets" style="color: var(--text-muted); text-decoration: none;">
+                                <i class="fa-solid fa-arrow-left"></i> 返回列表
+                            </a>
+                        </div>
+                        ${resource.cover_path ? `<img src="${resource.cover_path}" style="width:100%; border-radius:12px; margin-bottom:20px;">` : ''}
+                        <h1 style="margin-bottom: 10px;">${resource.title}</h1>
+                        <div style="color: var(--text-muted); margin-bottom: 20px;">
+                            作者: ${resource.author || 'Unknown'} • 
+                            分类: ${resource.category_name || '未分类'} • 
+                            浏览: ${resource.views || 0} • 
+                            点赞: ${resource.likes || 0}
+                        </div>
+                        ${resource.description ? `<p style="line-height:1.8; margin-bottom:20px;">${resource.description}</p>` : ''}
+                        ${resource.content_body ? `<div style="line-height:1.8; margin-bottom:20px;">${resource.content_body}</div>` : ''}
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:20px;">
+                            ${attrs.software ? `<div class="glass-card stat-card">
+                                <div style="color:var(--text-muted); font-size:0.9rem; margin-bottom:5px;">支持软件</div>
+                                <div style="font-weight:bold;">${Array.isArray(attrs.software) ? attrs.software.join(', ') : attrs.software}</div>
+                            </div>` : ''}
+                            ${attrs.format ? `<div class="glass-card stat-card">
+                                <div style="color:var(--text-muted); font-size:0.9rem; margin-bottom:5px;">文件格式</div>
+                                <div style="font-weight:bold;">${attrs.format}</div>
+                            </div>` : ''}
+                            ${attrs.size ? `<div class="glass-card stat-card">
+                                <div style="color:var(--text-muted); font-size:0.9rem; margin-bottom:5px;">文件大小</div>
+                                <div style="font-weight:bold;">${attrs.size}</div>
+                            </div>` : ''}
+                            ${attrs.rating ? `<div class="glass-card stat-card">
+                                <div style="color:var(--text-muted); font-size:0.9rem; margin-bottom:5px;">评分</div>
+                                <div style="font-weight:bold;">★ ${attrs.rating}</div>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                `;
+                res.send(render({ 
+                    title: resource.title + ' - 设计素材', 
+                    content: content, 
+                    currentModule: 'design-assets'
                 }));
             }
         }

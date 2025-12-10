@@ -1,5 +1,6 @@
 const path = require('path');
 const { render } = require('../../core/layout-engine');
+const db = require('../../core/db-access');
 
 // 1. 配置信息
 const HERO_DATA = {
@@ -8,17 +9,174 @@ const HERO_DATA = {
     bg: "https://images.unsplash.com/photo-1533134486753-c833f0ed4866?w=1600&q=80"
 };
 
-const CATEGORIES = [
-    { id: 'all', name: '综合推荐' },
-    { id: 'concept', name: '概念原画' },
-    { id: 'model', name: '3D模型' },
-    { id: 'env', name: '场景地编' },
-    { id: 'vfx', name: '视觉特效' },
-    { id: 'ui', name: '游戏UI' }
-];
+// 格式化数字
+function formatNumber(num) {
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+    return num.toString();
+}
 
-// 2. 模拟作品库
-const WORKS_DATA = [
+// 从数据库获取资源数据
+async function getWorksData() {
+    try {
+        const resources = await db.query(`
+            SELECT r.*, c.slug as category_slug, c.name as category_name, 
+                   u.username as author, u.avatar as author_avatar,
+                   a.file_path as cover_path
+            FROM resources r
+            LEFT JOIN categories c ON r.category_id = c.id
+            LEFT JOIN users u ON r.author_id = u.id
+            LEFT JOIN assets a ON r.cover_asset_id = a.id
+            WHERE r.status = 'published'
+            ORDER BY r.created_at DESC
+            LIMIT 50
+        `);
+
+        // 转换为前端需要的格式
+        const works = await Promise.all(resources.map(async (r) => {
+            const attrs = r.attributes ? JSON.parse(r.attributes) : {};
+            const tags = r.tags ? r.tags.split(',').map(t => t.trim()) : [];
+            
+            // 映射分类slug到type
+            const typeMap = {
+                'concept-art': 'concept',
+                '3d-models': 'model',
+                'level-design': 'env',
+                'design-assets': 'concept',
+                'game-resources': 'vfx'
+            };
+            const type = typeMap[r.category_slug] || r.category_slug || 'all';
+
+            const work = {
+                id: r.id,
+                title: r.title,
+                author: r.author || 'Unknown',
+                avatar: r.author_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${r.author || 'User'}`,
+                type: type,
+                views: formatNumber(r.views || 0),
+                likes: formatNumber(r.likes || 0),
+                cover: r.cover_path || 'https://images.unsplash.com/photo-1533134486753-c833f0ed4866?w=600&q=80',
+                desc: r.description || '',
+                tags: tags
+            };
+
+            // 如果是3D模型，添加modelConfig并查找模型文件
+            if (type === 'model' && attrs.format) {
+                // 查找关联的模型文件（file_type为'model'的assets）
+                const modelAssets = await db.query(`
+                    SELECT file_path, original_name, size
+                    FROM assets 
+                    WHERE resource_id = ? AND file_type = 'model' AND is_cover = 0
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                `, [r.id]);
+                
+                // 如果没有找到模型文件，尝试查找所有非封面文件
+                let modelPath = null;
+                let modelFileSize = null;
+                if (modelAssets.length > 0) {
+                    modelPath = modelAssets[0].file_path;
+                    modelFileSize = modelAssets[0].size;
+                } else {
+                    const allAssets = await db.query(`
+                        SELECT file_path, original_name, file_type, size
+                        FROM assets 
+                        WHERE resource_id = ? AND is_cover = 0
+                        ORDER BY created_at DESC
+                    `, [r.id]);
+                    // 查找模型格式的文件（通过扩展名判断）
+                    const modelExts = ['.glb', '.gltf', '.fbx', '.obj', '.dae', '.3ds', '.blend', '.max', '.ma', '.mb', '.stl', '.ply'];
+                    const modelAsset = allAssets.find(a => {
+                        const ext = a.file_path ? a.file_path.toLowerCase().substring(a.file_path.lastIndexOf('.')) : '';
+                        return modelExts.includes(ext);
+                    });
+                    if (modelAsset) {
+                        modelPath = modelAsset.file_path;
+                        modelFileSize = modelAsset.size;
+                    }
+                }
+                
+                // 格式化文件大小（如果从assets表获取）
+                let formattedSize = 'N/A';
+                if (modelFileSize) {
+                    const bytes = modelFileSize;
+                    if (bytes === 0) {
+                        formattedSize = '0 B';
+                    } else {
+                        const k = 1024;
+                        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+                        const i = Math.floor(Math.log(bytes) / Math.log(k));
+                        formattedSize = Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+                    }
+                }
+                
+                // 尝试多种可能的字段名
+                const verticesValue = attrs.vertices || attrs.vertex_count || attrs.vertex || attrs.vertexCount || null;
+                
+                work.modelConfig = {
+                    src: modelPath || (attrs.download_link || ''),
+                    format: attrs.format || 'Unknown',
+                    faces: attrs.poly_count || attrs.faces || 'N/A',
+                    vertices: verticesValue || 'N/A',
+                    fileSize: attrs.fileSize || attrs.size || formattedSize,
+                    software: attrs.software || attrs.engine || 'Unknown'
+                };
+            }
+
+            // 添加media数组
+            work.media = [{ type: 'image', src: work.cover }];
+
+            return work;
+        }));
+        
+        return works;
+    } catch (error) {
+        console.error('获取资源数据失败:', error);
+        return [];
+    }
+}
+
+// 获取分类列表（从数据库读取首页模块的所有分类）
+async function getCategories() {
+    try {
+        // 查询module_id为'home'的所有分类
+        const categories = await db.query(`
+            SELECT slug, name FROM categories 
+            WHERE module_id = 'home'
+            ORDER BY sort_order ASC
+        `);
+        
+        // 映射分类slug到前端type（用于筛选）
+        const categoryMap = {
+            'concept-art': { id: 'concept', name: '概念原画' },
+            '3d-models': { id: 'model', name: '3D模型' },
+            'level-design': { id: 'env', name: '场景地编' }
+        };
+
+        const result = [{ id: 'all', name: '综合推荐' }];
+        categories.forEach(cat => {
+            const mapped = categoryMap[cat.slug];
+            if (mapped) {
+                result.push({ id: mapped.id, name: mapped.name });
+            } else {
+                // 如果没有映射，使用slug作为id，name作为显示名称
+                result.push({ id: cat.slug, name: cat.name });
+            }
+        });
+        
+        return result;
+    } catch (error) {
+        console.error('获取分类失败:', error);
+        return [
+            { id: 'all', name: '综合推荐' },
+            { id: 'concept', name: '概念原画' },
+            { id: 'model', name: '3D模型' },
+            { id: 'env', name: '场景地编' }
+        ];
+    }
+}
+
+// 2. 模拟作品库（保留作为fallback）
+const WORKS_DATA_FALLBACK = [
     { 
         id: 1, 
         title: "赛博废墟: 侦察兵", 
@@ -98,7 +256,10 @@ const WORKS_DATA = [
     },
 ];
 
-function renderHomePage() {
+async function renderHomePage() {
+    const WORKS_DATA = await getWorksData();
+    const CATEGORIES = await getCategories();
+    
     return `
     <div class="home-module-container">
         <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
@@ -193,7 +354,7 @@ function renderHomePage() {
         </div>
 
         <script>
-            const ALL_WORKS = ${JSON.stringify(WORKS_DATA)};
+            const ALL_WORKS = ${JSON.stringify(WORKS_DATA || [])};
 
             const HomeApp = {
                 // 缓存当前查看的 ID
@@ -313,17 +474,28 @@ function renderHomePage() {
                 
                 open3DPreview: function(dataStr) {
                     const data = JSON.parse(decodeURIComponent(dataStr));
-                    if (!data.modelConfig) return;
+                    if (!data.modelConfig) {
+                        console.warn('3D预览：缺少modelConfig', data);
+                        return;
+                    }
 
                     const modal = document.getElementById('preview3DModal');
                     const container = document.getElementById('modelViewerContainer');
                     
-                    // 1. 填充信息
-                    document.getElementById('v3dTitle').innerText = data.title;
-                    document.getElementById('v3dFormat').innerText = data.modelConfig.format;
-                    document.getElementById('v3dFaces').innerText = data.modelConfig.faces;
-                    document.getElementById('v3dVertices').innerText = data.modelConfig.vertices;
-                    document.getElementById('v3dSize').innerText = data.modelConfig.fileSize || 'Unknown';
+                    // 1. 填充信息（确保所有值都有默认值）
+                    const verticesValue = data.modelConfig.vertices;
+                    
+                    document.getElementById('v3dTitle').innerText = data.title || '未命名模型';
+                    document.getElementById('v3dFormat').innerText = data.modelConfig.format || 'Unknown';
+                    document.getElementById('v3dFaces').innerText = data.modelConfig.faces || data.modelConfig.poly_count || 'N/A';
+                    
+                    // 确保顶点数正确显示
+                    const verticesDisplay = verticesValue && verticesValue !== 'N/A' && verticesValue !== 'null' && verticesValue !== 'undefined' 
+                        ? String(verticesValue) 
+                        : 'N/A';
+                    document.getElementById('v3dVertices').innerText = verticesDisplay;
+                    
+                    document.getElementById('v3dSize').innerText = data.modelConfig.fileSize || data.modelConfig.size || 'N/A';
 
                     // 2. 关键修复：每次都重新生成 HTML，确保 WebGL 上下文全新
                     // 动态创建 model-viewer 标签
@@ -476,13 +648,71 @@ module.exports = {
         {
             method: 'GET',
             path: '/',
-            handler: (req, res) => {
-                const content = renderHomePage();
+            handler: async (req, res) => {
+                // 更新浏览量（异步，不阻塞响应）
+                const content = await renderHomePage();
                 res.send(render({ 
                     title: '首页 - JackyRoom', 
                     content: content, 
                     currentModule: 'home',
                     extraHead: '<link rel="stylesheet" href="/modules/home/home.css">'
+                }));
+            }
+        },
+        {
+            method: 'GET',
+            path: '/view/:id',
+            handler: async (req, res) => {
+                const resourceId = req.params.id;
+                
+                // 更新浏览量
+                await db.run("UPDATE resources SET views = views + 1 WHERE id = ?", [resourceId]);
+                
+                const resource = await db.get(`
+                    SELECT r.*, c.name as category_name, c.slug as category_slug,
+                           u.username as author, u.avatar as author_avatar,
+                           a.file_path as cover_path
+                    FROM resources r
+                    LEFT JOIN categories c ON r.category_id = c.id
+                    LEFT JOIN users u ON r.author_id = u.id
+                    LEFT JOIN assets a ON r.cover_asset_id = a.id
+                    WHERE r.id = ? AND r.status = 'published'
+                `, [resourceId]);
+
+                if (!resource) {
+                    return res.status(404).send('资源不存在');
+                }
+
+                const attrs = resource.attributes ? JSON.parse(resource.attributes) : {};
+                const tags = resource.tags ? resource.tags.split(',').map(t => t.trim()) : [];
+
+                const content = `
+                    <link rel="stylesheet" href="/modules/home/home.css">
+                    <div class="glass-card" style="max-width: 1200px; margin: 0 auto;">
+                        <div style="margin-bottom: 20px;">
+                            <a href="/" style="color: var(--text-muted); text-decoration: none;">
+                                <i class="fa-solid fa-arrow-left"></i> 返回首页
+                            </a>
+                        </div>
+                        <h1 style="margin-bottom: 10px;">${resource.title}</h1>
+                        <div style="color: var(--text-muted); margin-bottom: 20px;">
+                            作者: ${resource.author || 'Unknown'} • 
+                            分类: ${resource.category_name || '未分类'} • 
+                            浏览: ${resource.views || 0} • 
+                            点赞: ${resource.likes || 0}
+                        </div>
+                        ${resource.cover_path ? `<img src="${resource.cover_path}" style="width:100%; border-radius:12px; margin-bottom:20px;">` : ''}
+                        ${resource.description ? `<p style="line-height:1.8; margin-bottom:20px;">${resource.description}</p>` : ''}
+                        ${resource.content_body ? `<div style="line-height:1.8; margin-bottom:20px;">${resource.content_body}</div>` : ''}
+                        ${tags.length > 0 ? `<div style="margin-top:20px;">
+                            ${tags.map(t => `<span style="display:inline-block; padding:4px 12px; background:var(--primary-15); color:var(--primary); border-radius:4px; margin-right:8px; margin-bottom:8px;">#${t}</span>`).join('')}
+                        </div>` : ''}
+                    </div>
+                `;
+                res.send(render({ 
+                    title: resource.title + ' - JackyRoom', 
+                    content: content, 
+                    currentModule: 'home'
                 }));
             }
         }
