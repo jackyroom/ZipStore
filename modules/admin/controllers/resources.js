@@ -711,88 +711,165 @@ function getEditorHtml(mode, resource, modules, categories) {
     const coverPath = data.cover_path || '';
 
     return `
-        <div class="split-editor-container">
-            <!-- Left: Editor Pane -->
-            <div class="editor-pane">
-                <div class="glass-card" style="margin-bottom:20px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-                        <h2 style="margin:0;">${isEdit ? '编辑资源' : '发布新内容'}</h2>
-                         <a href="/admin/resources" class="btn-secondary" style="padding:6px 12px; font-size:12px;"><i class="fa-solid fa-arrow-left"></i> 返回</a>
+        <div class="beautified-editor-area">
+            <!-- LEFT PANE: Editor Form -->
+            <div class="editor-scroll-container">
+                <form id="resourceForm" onsubmit="return submitResource(event)">
+                    ${isEdit ? `<input type="hidden" name="resource_id" value="${data.id}">` : ''}
+                    
+                    <!-- Header -->
+                    <div style="margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <h1 style="margin:0; font-size:1.8rem; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                                ${isEdit ? '编辑内容' : '发布新作品'}
+                            </h1>
+                            <p style="margin:4px 0 0 0; color:var(--text-secondary); font-size:0.9rem;">
+                                ${isEdit ? '修改现有资源信息' : '填写以下信息以创建新资源'}
+                            </p>
+                        </div>
+                        <div style="display:flex; gap:12px;">
+                            <a href="/admin/resources" class="btn-secondary" style="border-radius:10px;">取消</a>
+                            <button type="submit" class="btn-primary" style="padding:10px 24px; border-radius:10px; font-weight:600; letter-spacing:0.5px;">
+                                <i class="fa-solid fa-rocket" style="margin-right:8px;"></i> ${isEdit ? '保存更改' : '立即发布'}
+                            </button>
+                        </div>
                     </div>
 
-                    <form id="resourceForm" class="admin-form" onsubmit="return submitResource(event)">
-                        ${isEdit ? `<input type="hidden" name="resource_id" value="${data.id}">` : ''}
+                    <!-- Inner Grid: 2/3 Content, 1/3 Meta -->
+                    <div class="editor-grid-inner">
                         
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                            <div>
-                                <label>选择主页面 *</label>
-                                <select name="module_id" id="moduleSelect" required onchange="loadModuleCategories()">
-                                    <option value="">-- 请选择 --</option>
-                                    ${modules.map(m => `<option value="${m.id}" ${data.module_id === m.id ? 'selected' : ''}>${m.label}</option>`).join('')}
-                                </select>
+                        <!-- COLUMN 1: Main Content -->
+                        <div class="col-main">
+                            
+                            <!-- Essential Info -->
+                            <div class="b-section">
+                                <div class="b-section-title"><i class="fa-solid fa-pen-nib"></i> 核心信息</div>
+                                
+                                <div class="b-input-group">
+                                    <input type="text" name="title" id="inputTitle" class="b-input b-input-lg" required 
+                                           value="${(data.title || '').replace(/"/g, '&quot;')}" 
+                                           placeholder="输入引人注目的标题...">
+                                </div>
+                                
+                                <div class="b-input-group">
+                                    <label class="b-label">简述 / 摘要</label>
+                                    <textarea name="description" id="inputDesc" class="b-input" rows="3" 
+                                              placeholder="简短描述内容概要，用于列表展示...">${(data.description || '')}</textarea>
+                                </div>
                             </div>
-                            <div>
-                                <label>选择分类 *</label>
-                                <select name="category_id" id="categorySelect" required onchange="updateFormFields()">
-                                    <option value="">-- 请选择 --</option>
-                                    ${categories.map(cat => {
+
+                            <!-- Content Body -->
+                            <div class="b-section" style="flex:1;">
+                                <div class="b-section-title">
+                                    <div style="display:flex; justify-content:space-between; width:100%;">
+                                        <span><i class="fa-brands fa-markdown"></i> 详细内容</span>
+                                        <span style="font-size:0.75rem; cursor:pointer; opacity:0.7;">Markdown Supported</span>
+                                    </div>
+                                </div>
+                                <div class="b-input-group" style="margin-bottom:0;">
+                                    <textarea name="content_body" id="inputBody" class="b-input b-textarea-code" rows="20" 
+                                              placeholder="# 一级标题\n\n正文内容..." 
+                                              spellcheck="false">${(data.content_body || '')}</textarea>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- COLUMN 2: Meta Side -->
+                        <div class="col-side">
+                            
+                            <!-- Classification -->
+                            <div class="b-section">
+                                <div class="b-section-title"><i class="fa-solid fa-folder-tree"></i> 分类归属</div>
+                                <div class="b-input-group">
+                                    <label class="b-label">所属模块</label>
+                                    <select name="module_id" id="moduleSelect" class="b-input" required onchange="loadModuleCategories()">
+                                        <option value="">-- 请选择 --</option>
+                                        ${modules.map(m => `<option value="${m.id}" ${data.module_id === m.id ? 'selected' : ''}>${m.label}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div class="b-input-group" style="margin-bottom:0;">
+                                    <label class="b-label">具体分类</label>
+                                    <select name="category_id" id="categorySelect" class="b-input" required onchange="updateFormFields()">
+                                        <option value="">-- 请选择 --</option>
+                                        ${categories.map(cat => {
         const schema = cat.meta_schema ? JSON.parse(cat.meta_schema) : {};
         return `<option value="${cat.id}" ${data.category_id == cat.id ? 'selected' : ''} data-schema='${JSON.stringify(schema)}'>${cat.name}</option>`;
     }).join('')}
-                                </select>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
 
-                        <label>标题 *</label>
-                        <input type="text" name="title" id="inputTitle" required value="${(data.title || '').replace(/"/g, '&quot;')}" placeholder="输入资源标题">
-
-                        <label>描述</label>
-                        <textarea name="description" id="inputDesc" placeholder="简短描述">${(data.description || '')}</textarea>
-
-                        <div id="dynamicFields"></div>
-
-                        <label>正文内容 (Markdown) *</label>
-                        <textarea name="content_body" id="inputBody" rows="12" placeholder="支持Markdown格式">${(data.content_body || '')}</textarea>
-
-                        <label>标签</label>
-                        <input type="text" name="tags" id="inputTags" value="${(data.tags || '')}" placeholder="例如：UE5, 3D">
-
-                        <label>封面图片</label>
-                        <div id="coverUploadArea" style="border:2px dashed var(--border-color); padding:20px; border-radius:12px; text-align:center; cursor:pointer;" onclick="document.getElementById('coverFileInput').click()">
-                            <input type="file" id="coverFileInput" accept="image/*" style="display:none" onchange="uploadCover(this)">
-                            <div id="coverPreview" style="${coverPath ? 'display:block;' : 'display:none;'} margin-bottom:10px;">
-                                <img id="coverImg" src="${coverPath}" style="max-height:150px; border-radius:8px;">
+                            <!-- Cover Image -->
+                            <div class="b-section">
+                                <div class="b-section-title"><i class="fa-regular fa-image"></i> 封面图片</div>
+                                <input type="hidden" name="cover_asset_id" id="coverAssetId" value="${data.cover_asset_id || ''}">
+                                <div class="b-upload-zone" id="coverUploadZone" onclick="document.getElementById('coverFileInput').click()">
+                                    <input type="file" id="coverFileInput" accept="image/*" style="display:none" onchange="uploadCover(this)">
+                                    
+                                    <!-- Preview State -->
+                                    <div id="coverPreview" style="${coverPath ? 'display:block;' : 'display:none;'}">
+                                        <img id="coverImg" src="${coverPath}" class="b-preview-img">
+                                        <div style="margin-top:12px; font-size:0.8rem; color:var(--primary-accent); font-weight:600;">点击更换封面</div>
+                                    </div>
+                                    
+                                    <!-- Empty State -->
+                                    <div id="coverPlaceholder" class="b-upload-content" style="${coverPath ? 'display:none;' : 'display:flex;'}">
+                                        <i class="fa-solid fa-cloud-arrow-up b-upload-icon"></i>
+                                        <div style="font-weight:600;">点击上传</div>
+                                        <div style="font-size:0.75rem; opacity:0.6;">JPG, PNG, WEBP (Max 5MB)</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div id="coverPlaceholder" style="${coverPath ? 'display:none;' : 'display:block;'}">
-                                <i class="fa-solid fa-image" style="font-size:24px; color:var(--text-secondary);"></i>
-                                <div style="color:var(--text-secondary); font-size:0.9rem;">点击上传封面</div>
+
+                            <!-- Dynamic Attributes -->
+                            <div class="b-section">
+                                <div class="b-section-title"><i class="fa-solid fa-sliders"></i> 属性 & 标签</div>
+                                
+                                <div id="dynamicFields"></div>
+
+                                <!-- Default Attrs Fallback if no dynamic fields -->
+                                <div id="defaultAttrs" style="display:none;">
+                                    <div class="b-input-group">
+                                        <label class="b-label">分辨率 / 尺寸</label>
+                                        <input type="text" name="attr_resolution" class="b-input" value="${attrs.resolution || attrs.size || ''}">
+                                    </div>
+                                </div>
+
+                                <div class="b-input-group">
+                                    <label class="b-label">标签 (逗号分隔)</label>
+                                    <input type="text" name="tags" id="inputTags" class="b-input" value="${data.tags || ''}" placeholder="UE5, LowPoly...">
+                                </div>
+
+                                <div class="b-input-group" style="margin-bottom:0;">
+                                    <label class="b-label">发布状态</label>
+                                    <select name="status" class="b-input">
+                                        <option value="published" ${data.status === 'published' ? 'selected' : ''}>✅ 立即发布</option>
+                                        <option value="draft" ${data.status === 'draft' ? 'selected' : ''}>🔒 存为草稿</option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
-                        <input type="hidden" name="cover_asset_id" id="coverAssetId" value="${data.cover_asset_id || ''}">
 
-                        <label>状态</label>
-                        <select name="status">
-                            <option value="published" ${data.status === 'published' ? 'selected' : ''}>已发布</option>
-                            <option value="draft" ${data.status === 'draft' ? 'selected' : ''}>草稿</option>
-                        </select>
-
-                        <div style="margin-top:24px; text-align:right;">
-                            <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">
-                                <i class="fa-solid fa-paper-plane"></i> ${isEdit ? '保存修改' : '立即发布'}
-                            </button>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
 
-            <!-- Right: Real-time Preview (iframe) -->
-            <div class="preview-pane-wrapper">
-                <div class="preview-header">
-                    <span><i class="fa-regular fa-eye"></i> 实时预览 Real-time Preview</span>
-                    <span class="tag-badge">Live View</span>
+            <!-- RIGHT PANE: Real-time Preview -->
+            <div class="b-preview-container">
+                <div class="b-preview-notch"></div>
+                <div class="b-preview-header">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="color:#fff; font-weight:600; font-size:0.9rem;">iPhone 14 Pro</span>
+                    </div>
+                    <div class="b-live-badge">
+                        <div class="b-live-dot"></div>
+                        LIVE UPDATE
+                    </div>
                 </div>
-                <iframe id="previewFrame" style="width:100%; height:100%; border:none; background:#0f172a;"></iframe>
+                <iframe id="previewFrame" class="b-iframe"></iframe>
             </div>
+
         </div>
 
         <script>
@@ -803,76 +880,76 @@ function getEditorHtml(mode, resource, modules, categories) {
 
             document.addEventListener('DOMContentLoaded', () => {
                 if(${isEdit}) {
-                    updateFormFields();
+                updateFormFields();
                 }
-                bindPreviewEvents();
-                updatePreview(); // Initial render
+            bindPreviewEvents();
+            updatePreview(); // Initial render
             });
 
             function bindPreviewEvents() {
                 const inputs = ['inputTitle', 'inputDesc', 'inputBody', 'inputTags'];
                 inputs.forEach(id => {
-                    document.getElementById(id).addEventListener('input', debouncePreview);
+                document.getElementById(id).addEventListener('input', debouncePreview);
                 });
-                document.getElementById('moduleSelect').addEventListener('change', debouncePreview);
-                document.getElementById('categorySelect').addEventListener('change', debouncePreview);
+            document.getElementById('moduleSelect').addEventListener('change', debouncePreview);
+            document.getElementById('categorySelect').addEventListener('change', debouncePreview);
             }
 
             function debouncePreview() {
                 clearTimeout(previewDebounce);
-                previewDebounce = setTimeout(updatePreview, 500);
+            previewDebounce = setTimeout(updatePreview, 500);
             }
 
             async function updatePreview() {
                 const formData = {
-                    module_id: currentModuleId || document.getElementById('moduleSelect').value,
-                    category_id: document.getElementById('categorySelect').value,
-                    title: document.getElementById('inputTitle').value,
-                    description: document.getElementById('inputDesc').value,
-                    content_body: document.getElementById('inputBody').value,
-                    tags: document.getElementById('inputTags').value,
-                    cover_path: currentCoverPath,
-                    attributes: JSON.stringify(currentAttributes)
+                module_id: currentModuleId || document.getElementById('moduleSelect').value,
+            category_id: document.getElementById('categorySelect').value,
+            title: document.getElementById('inputTitle').value,
+            description: document.getElementById('inputDesc').value,
+            content_body: document.getElementById('inputBody').value,
+            tags: document.getElementById('inputTags').value,
+            cover_path: currentCoverPath,
+            attributes: JSON.stringify(currentAttributes)
                 };
 
-                try {
+            try {
                     const res = await fetch('/admin/api/preview', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formData)
+                method: 'POST',
+            headers: {'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
                     });
-                    const html = await res.text();
-                    const iframe = document.getElementById('previewFrame');
-                    iframe.srcdoc = html;
+            const html = await res.text();
+            const iframe = document.getElementById('previewFrame');
+            iframe.srcdoc = html;
                 } catch (error) {
-                    console.error('Preview update failed:', error);
+                console.error('Preview update failed:', error);
                 }
             }
 
             async function loadModuleCategories() {
                 const moduleSelect = document.getElementById('moduleSelect');
-                const categorySelect = document.getElementById('categorySelect');
-                const moduleId = moduleSelect.value;
-                currentModuleId = moduleId;
-                
-                if (!moduleId) {
-                    categorySelect.innerHTML = '<option value="">-- 请先选择主页面 --</option>';
-                    return;
+            const categorySelect = document.getElementById('categorySelect');
+            const moduleId = moduleSelect.value;
+            currentModuleId = moduleId;
+
+            if (!moduleId) {
+                categorySelect.innerHTML = '<option value="">-- 请先选择主页面 --</option>';
+            return;
                 }
-                try {
+            try {
                     const res = await fetch('/admin/api/categories/' + moduleId);
-                    const data = await res.json();
-                    if (data.success) {
-                        categorySelect.innerHTML = '<option value="">-- 请选择 --</option>';
+            const data = await res.json();
+            if (data.success) {
+                categorySelect.innerHTML = '<option value="">-- 请选择 --</option>';
                         data.categories.forEach(cat => {
                             const option = document.createElement('option');
-                            option.value = cat.id;
-                            option.textContent = cat.name;
-                            option.dataset.schema = cat.meta_schema || '{}';
-                            categorySelect.appendChild(option);
+            option.value = cat.id;
+            option.textContent = cat.name;
+            option.dataset.schema = cat.meta_schema || '{ }';
+            categorySelect.appendChild(option);
                         });
                     }
-                } catch (e) { console.error(e); }
+                } catch (e) {console.error(e); }
             }
 
             function updateFormFields() {
@@ -893,9 +970,12 @@ function getEditorHtml(mode, resource, modules, categories) {
                         const value = currentAttributes[fieldName] || '';
                         
                         const div = document.createElement('div');
-                        div.style.marginBottom = '16px';
-                        const inputHTML = \`<label>\${fieldLabel}</label>
-                                           <input type="text" class="dyn-attr-input" name="attr_\${fieldName}" value="\${value}" placeholder="\${fieldLabel}">\`;
+                        // Use the unified styled structure for dynamic fields
+                        const inputHTML = \`
+                            <div class="b-input-group">
+                                <label class="b-label">\${fieldLabel}</label>
+                                <input type="text" class="b-input dyn-attr-input" name="attr_\${fieldName}" value="\${value}" placeholder="\${fieldLabel}">
+                            </div>\`;
                         div.innerHTML = inputHTML;
                         fieldsDiv.appendChild(div);
                     });
@@ -911,42 +991,42 @@ function getEditorHtml(mode, resource, modules, categories) {
                 debouncePreview();
             }
 
-            function uploadCover(input) {
+                function uploadCover(input) {
                 if (!input.files[0]) return;
                 const formData = new FormData();
                 formData.append('file', input.files[0]);
                 formData.append('isCover', 'true');
 
-                fetch('/admin/api/upload', { method: 'POST', body: formData })
+                fetch('/admin/api/upload', {method: 'POST', body: formData })
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById('coverAssetId').value = data.asset.id;
-                        document.getElementById('coverImg').src = data.asset.path;
-                        document.getElementById('coverPreview').style.display = 'block';
-                        document.getElementById('coverPlaceholder').style.display = 'none';
-                        currentCoverPath = data.asset.path;
-                        updatePreview();
+                    document.getElementById('coverAssetId').value = data.asset.id;
+                document.getElementById('coverImg').src = data.asset.path;
+                document.getElementById('coverPreview').style.display = 'block';
+                document.getElementById('coverPlaceholder').style.display = 'none';
+                currentCoverPath = data.asset.path;
+                updatePreview();
                     }
                 });
             }
 
-            async function submitResource(e) {
-                e.preventDefault();
+                async function submitResource(e) {
+                    e.preventDefault();
                 const form = e.target;
                 const formData = new FormData(form);
-                const attributes = {};
+                const attributes = { };
                 formData.forEach((value, key) => {
                     if (key.startsWith('attr_')) {
-                        attributes[key.replace('attr_', '')] = value;
-                        formData.delete(key);
+                    attributes[key.replace('attr_', '')] = value;
+                formData.delete(key);
                     }
                 });
                 formData.append('attributes', JSON.stringify(attributes));
 
                 try {
-                    const res = await fetch('/admin/resources/create', { method: 'POST', body: formData });
-                    if (res.redirected) window.location.href = res.url;
+                    const res = await fetch('/admin/resources/create', {method: 'POST', body: formData });
+                if (res.redirected) window.location.href = res.url;
                 } catch (error) {
                     alert('Process failed');
                 }

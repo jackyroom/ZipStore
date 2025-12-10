@@ -556,3 +556,301 @@ h3 {
     border: none;
     background: #0f172a;
 }
+
+/* =========================================
+   Redesigned Editor & Preview (Beautification)
+   ========================================= */
+
+/* Use a specific scope to ensure no side effects */
+.beautified-editor-area {
+    display: grid;
+    grid-template-columns: 1.8fr 1.2fr;
+    /* Optimized ratio */
+    gap: 32px;
+    height: calc(100vh - 140px);
+    overflow: hidden;
+    padding-bottom: 20px;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* --- Left: Editor Form Area --- */
+.editor-scroll-container {
+    overflow-y: auto;
+    padding-right: 16px;
+    height: 100%;
+    scrollbar-gutter: stable;
+}
+
+.editor-grid-inner {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    /* Internal Split: Content vs Meta */
+    gap: 24px;
+    align-items: start;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1600px) {
+    .beautified-editor-area {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .editor-grid-inner {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Styled Section Container - Matching Dashboard Card Style */
+.b-section {
+    background: #1e293b;
+    /* Solid slate-800 to match dashboard cards */
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.b-section-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #94a3b8;
+    /* slate-400 */
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: 0.02em;
+}
+
+.b-section-title i {
+    color: #3b82f6;
+    /* Blue accent like dashboard */
+}
+
+.b-section-title i {
+    color: #3b82f6;
+    /* Blue accent like dashboard */
+}
+
+
+/* Modern Inputs - Dashboard Match */
+.b-input-group {
+    margin-bottom: 20px;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.b-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #cbd5e1;
+    /* slate-300, brighter for readability */
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.b-input {
+    width: 100%;
+    background: #0f172a;
+    /* Darker than card (slate-900) */
+    border: 1px solid #334155;
+    /* slate-700 */
+    border-radius: 8px;
+    /* Slightly tighter radius like dashboard */
+    padding: 12px 16px;
+    color: #f1f5f9;
+    /* slate-100 */
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.b-input:hover {
+    border-color: #475569;
+    /* slate-600 */
+}
+
+.b-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    /* Blue accent */
+    background: #0f172a;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    /* Blue ring */
+}
+
+.b-input::placeholder {
+    color: #475569;
+}
+
+.b-input-lg {
+    font-size: 1.1rem;
+    padding: 16px;
+    font-weight: 600;
+}
+
+/* Markdown Editor Area */
+.b-textarea-code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    line-height: 1.6;
+    font-size: 0.9rem;
+}
+
+/* Premium Upload Zone */
+.b-upload-zone {
+    border: 2px dashed rgba(148, 163, 184, 0.3);
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.3) 0%, rgba(15, 23, 42, 0.3) 100%);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.b-upload-zone:hover {
+    border-color: var(--primary-accent);
+    background: rgba(139, 92, 246, 0.05);
+    transform: scale(1.01);
+}
+
+.b-upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-muted);
+    z-index: 2;
+    position: relative;
+}
+
+.b-upload-icon {
+    font-size: 2rem;
+    color: var(--primary-accent);
+    filter: drop-shadow(0 4px 12px rgba(139, 92, 246, 0.4));
+}
+
+.b-preview-img {
+    width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+}
+
+.b-preview-img:hover {
+    transform: scale(1.05);
+}
+
+/* --- Right: Realistic Preview Device --- */
+.b-preview-container {
+    background: #000;
+    border-radius: 24px;
+    border: 8px solid #1e293b;
+    /* Bezel */
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.5),
+        inset 0 0 0 2px rgba(255, 255, 255, 0.1);
+    /* Inner highlight */
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Notch/Camera Mockup */
+.b-preview-notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 24px;
+    background: #1e293b;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.b-preview-notch::after {
+    content: '';
+    width: 60px;
+    height: 6px;
+    background: #334155;
+    border-radius: 10px;
+}
+
+.b-preview-header {
+    background: #0f172a;
+    padding: 16px 20px;
+    padding-top: 32px;
+    /* Account for notch */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.b-live-badge {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.b-live-dot {
+    width: 6px;
+    height: 6px;
+    background: #34d399;
+    border-radius: 50%;
+    animation: livePulse 2s infinite;
+}
+
+@keyframes livePulse {
+    0% {
+        opacity: 0.5;
+        box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4);
+    }
+
+    70% {
+        opacity: 1;
+        box-shadow: 0 0 0 6px rgba(52, 211, 153, 0);
+    }
+
+    100% {
+        opacity: 0.5;
+        box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
+    }
+}
+
+.b-iframe {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: #020617;
+}
+
+/* Custom Scrollbar for editor pane */
+.editor-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.editor-scroll-container::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.2);
+    border-radius: 3px;
+}
+
+.editor-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.4);
+}
