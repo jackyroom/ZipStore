@@ -11,7 +11,7 @@ module.exports = [
             const modules = config.menu.filter(m => m.id && !['admin', 'user', 'plugins', 'chat', 'games'].includes(m.id));
 
             const content = `
-                <div class="glass-card" style="max-width: 1000px; margin: 0 auto;">
+                <div class="glass-card" style="margin: 0 auto;">
                     <div style="margin-bottom:24px; border-bottom:1px solid var(--border-color); padding-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
                         <h2>分类管理</h2>
                         <button onclick="document.getElementById('addCategoryModal').style.display='flex'" class="btn-primary">

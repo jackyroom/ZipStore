@@ -231,6 +231,8 @@ body.admin-body {
     /* Remove blur for this specific flat design, or keep it subtle */
     backdrop-filter: none;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    margin: 0 auto;
 }
 
 h1,
@@ -571,6 +573,7 @@ h3 {
     overflow: hidden;
     padding-bottom: 20px;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: transparent;
 }
 
 /* --- Left: Editor Form Area --- */
@@ -603,20 +606,29 @@ h3 {
 
 /* Styled Section Container - Matching Dashboard Card Style */
 .b-section {
-    background: #1e293b;
-    /* Solid slate-800 to match dashboard cards */
-    border: 1px solid rgba(148, 163, 184, 0.1);
-    border-radius: 16px;
+    background: #232429;
+    /* Darker grey as in image */
+    border: 1px solid #32343a;
+    border-radius: 12px;
     padding: 24px;
     margin-bottom: 24px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    color: var(--text-primary);
+    box-shadow: none;
+    /* Flat look as per image */
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.b-section:hover {
+    background: #232429;
+    border-color: #4b4d55;
+    box-shadow: none;
 }
 
 .b-section-title {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    color: #94a3b8;
-    /* slate-400 */
+    color: #8da2fb;
+    /* Blue accent title */
     margin-bottom: 20px;
     display: flex;
     align-items: center;
@@ -625,19 +637,12 @@ h3 {
 }
 
 .b-section-title i {
-    color: #3b82f6;
-    /* Blue accent like dashboard */
+    color: #8da2fb;
 }
-
-.b-section-title i {
-    color: #3b82f6;
-    /* Blue accent like dashboard */
-}
-
 
 /* Modern Inputs - Dashboard Match */
 .b-input-group {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     position: relative;
     box-sizing: border-box;
 }
@@ -645,44 +650,70 @@ h3 {
 .b-label {
     display: block;
     font-size: 0.85rem;
-    color: #cbd5e1;
-    /* slate-300, brighter for readability */
-    margin-bottom: 8px;
+    color: #9ca3af;
+    /* muted text */
+    margin-bottom: 10px;
     font-weight: 500;
 }
 
 .b-input {
     width: 100%;
-    background: #0f172a;
-    /* Darker than card (slate-900) */
-    border: 1px solid #334155;
-    /* slate-700 */
-    border-radius: 8px;
-    /* Slightly tighter radius like dashboard */
-    padding: 12px 16px;
-    color: #f1f5f9;
-    /* slate-100 */
+    background: #191a1d;
+    /* Very dark input background */
+    border: 1px solid #33353b;
+    border-radius: 6px;
+    padding: 14px 16px;
+    color: #e5e7eb;
     font-size: 0.9rem;
     transition: all 0.2s ease;
     box-sizing: border-box;
 }
 
 .b-input:hover {
-    border-color: #475569;
-    /* slate-600 */
+    border-color: #4b5563;
 }
 
 .b-input:focus {
     outline: none;
-    border-color: #3b82f6;
-    /* Blue accent */
-    background: #0f172a;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-    /* Blue ring */
+    border-color: #6366f1;
+    background: #191a1d;
 }
 
 .b-input::placeholder {
-    color: #475569;
+    color: #4b5563;
+}
+
+/* Ensure native controls match admin dark theme */
+.beautified-editor-area select.b-input,
+.beautified-editor-area textarea.b-input,
+.beautified-editor-area input.b-input {
+    background-color: #191a1d;
+    border-color: #33353b;
+}
+
+.beautified-editor-area select.b-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+    padding-right: 2.5rem;
+}
+
+.beautified-editor-area select.b-input option {
+    background-color: #191a1d;
+    color: #e2e8f0;
+    padding: 12px;
+}
+
+.beautified-editor-area select.b-input:focus {
+    border-color: #6366f1;
+}
+
+/* Native dropdown list tone on admin forms */
+.admin-form select option {
+    background-color: var(--admin-bg);
+    color: var(--text-primary);
 }
 
 .b-input-lg {
@@ -746,13 +777,13 @@ h3 {
 
 /* --- Right: Realistic Preview Device --- */
 .b-preview-container {
-    background: #000;
+    background: var(--admin-bg);
     border-radius: 24px;
-    border: 8px solid #1e293b;
+    border: 8px solid var(--border-color);
     /* Bezel */
     box-shadow:
         0 20px 50px rgba(0, 0, 0, 0.5),
-        inset 0 0 0 2px rgba(255, 255, 255, 0.1);
+        inset 0 0 0 2px rgba(255, 255, 255, 0.05);
     /* Inner highlight */
     overflow: hidden;
     height: 100%;
@@ -787,14 +818,14 @@ h3 {
 }
 
 .b-preview-header {
-    background: #0f172a;
+    background: var(--card-bg);
     padding: 16px 20px;
     padding-top: 32px;
     /* Account for notch */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .b-live-badge {

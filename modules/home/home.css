@@ -412,7 +412,7 @@
 
 /* 底部标签 */
 .modal-footer-tags {
-    max-width: 1000px;
+    /*max-width: 1000px;*/
     margin: 0 auto 60px;
     display: flex;
     flex-wrap: wrap;
