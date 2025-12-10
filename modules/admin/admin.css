@@ -510,3 +510,49 @@ h3 {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--text-secondary);
 }
+
+/* ========== Split Editor Layout ========== */
+.split-editor-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    height: calc(100vh - 140px);
+    overflow: hidden;
+}
+
+.editor-pane {
+    overflow-y: auto;
+    padding-right: 12px;
+    height: 100%;
+}
+
+/* ========== Real-time Preview Pane (iframe) ========== */
+.preview-pane-wrapper {
+    background: #0f172a;
+    border: 1px solid rgba(51, 65, 85, 0.5);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.preview-header {
+    background: #1e293b;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+#previewFrame {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: #0f172a;
+}

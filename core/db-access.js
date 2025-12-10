@@ -277,41 +277,48 @@ function initDefaultCategories() {
             ]
         }) },
         
-        // 其他模块的分类（增强meta_schema）
-        { module_id: 'blog', name: '技术博客', slug: 'tech-blog', icon: 'fa-solid fa-code', description: '技术文章与教程', meta_schema: JSON.stringify({ 
-            fields: [
-                { name: 'tags', label: '标签', type: 'text', placeholder: '例如：JavaScript, Node.js', required: false },
-                { name: 'category', label: '分类', type: 'text', placeholder: '例如：前端开发', required: false }
-            ]
-        }) },
-        { module_id: 'gallery', name: '摄影画廊', slug: 'gallery', icon: 'fa-solid fa-images', description: '摄影作品', meta_schema: JSON.stringify({ 
-            fields: [
-                { name: 'camera', label: '相机型号', type: 'text', placeholder: '例如：Sony A7M3', required: false },
-                { name: 'location', label: '拍摄地点', type: 'text', placeholder: '例如：北京', required: false },
-                { name: 'style', label: '风格', type: 'text', placeholder: '例如：风景、人像', required: false }
-            ]
-        }) },
-        { module_id: 'moments', name: '生活动态', slug: 'moments', icon: 'fa-solid fa-camera-retro', description: '生活分享', meta_schema: JSON.stringify({ 
-            fields: [
-                { name: 'location', label: '地点', type: 'text', placeholder: '例如：上海', required: false },
-                { name: 'tags', label: '标签', type: 'text', placeholder: '例如：日常、旅行', required: false }
-            ]
-        }) },
-        { module_id: 'books', name: '书籍阅读', slug: 'books', icon: 'fa-solid fa-book', description: '书籍资源', meta_schema: JSON.stringify({ 
-            fields: [
-                { name: 'author', label: '作者', type: 'text', placeholder: '例如：张三', required: false },
-                { name: 'publisher', label: '出版社', type: 'text', placeholder: '例如：人民文学出版社', required: false },
-                { name: 'isbn', label: 'ISBN', type: 'text', placeholder: '例如：978-7-02-000000-0', required: false },
-                { name: 'format', label: '格式', type: 'text', placeholder: '例如：PDF, EPUB', required: false }
-            ]
-        }) },
-        { module_id: 'game-resources', name: '游戏资源', slug: 'game-resources', icon: 'fa-solid fa-ghost', description: '游戏相关资源', meta_schema: JSON.stringify({ 
-            fields: [
-                { name: 'genre', label: '游戏类型', type: 'text', placeholder: '例如：RPG, FPS', required: false },
-                { name: 'platform', label: '平台', type: 'text', placeholder: '例如：PC, PS5', required: false },
-                { name: 'size', label: '文件大小', type: 'text', placeholder: '例如：50 GB', required: false }
-            ]
-        }) }
+        // 技术博客（.category-list）
+        { module_id: 'blog', name: '全部文章', slug: 'blog-all', icon: 'fa-solid fa-list', description: '全部博文', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'blog', name: '前端开发', slug: 'blog-frontend', icon: 'fa-solid fa-code', description: '前端开发', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'blog', name: '后端开发', slug: 'blog-backend', icon: 'fa-solid fa-server', description: '后端开发', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'blog', name: 'AI与数据', slug: 'blog-ai', icon: 'fa-solid fa-robot', description: 'AI 与数据', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'blog', name: '云原生', slug: 'blog-cloud', icon: 'fa-solid fa-cloud', description: '云原生', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'blog', name: '工具技巧', slug: 'blog-tools', icon: 'fa-solid fa-wrench', description: '工具与技巧', meta_schema: JSON.stringify({ fields: [] }) },
+
+        // 光影画廊（.tag-pill）
+        { module_id: 'gallery', name: '推荐', slug: 'gallery-recommend', icon: 'fa-solid fa-star', description: '推荐作品', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'gallery', name: '热门', slug: 'gallery-hot', icon: 'fa-solid fa-fire', description: '热门作品', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'gallery', name: '插画', slug: 'gallery-illustration', icon: 'fa-solid fa-pen-nib', description: '插画', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'gallery', name: '3D建模', slug: 'gallery-3d', icon: 'fa-solid fa-cube', description: '3D建模', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'gallery', name: '摄影', slug: 'gallery-photo', icon: 'fa-solid fa-camera', description: '摄影', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'gallery', name: 'UI设计', slug: 'gallery-ui', icon: 'fa-solid fa-border-all', description: 'UI设计', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'gallery', name: '游戏原画', slug: 'gallery-gameart', icon: 'fa-solid fa-gamepad', description: '游戏原画', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'gallery', name: '动漫', slug: 'gallery-anime', icon: 'fa-solid fa-wand-magic-sparkles', description: '动漫', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'gallery', name: '赛事电竞', slug: 'gallery-esports', icon: 'fa-solid fa-bolt', description: '赛事电竞', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'gallery', name: '极简', slug: 'gallery-minimal', icon: 'fa-solid fa-circle', description: '极简风格', meta_schema: JSON.stringify({ fields: [] }) },
+
+        // 书籍阅读（.book-nav-item）
+        { module_id: 'books', name: '全部书籍', slug: 'books-all', icon: 'fa-solid fa-book', description: '全部书籍', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'books', name: '技术开发', slug: 'books-tech', icon: 'fa-solid fa-laptop-code', description: '技术开发', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'books', name: '科幻小说', slug: 'books-sci-fi', icon: 'fa-solid fa-rocket', description: '科幻小说', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'books', name: '设计美学', slug: 'books-design', icon: 'fa-solid fa-pencil-ruler', description: '设计美学', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'books', name: '经典文学', slug: 'books-classic', icon: 'fa-solid fa-feather', description: '经典文学', meta_schema: JSON.stringify({ fields: [] }) },
+
+        // 游戏资源（.game-nav-item）
+        { module_id: 'game-resources', name: '全部游戏', slug: 'gameres-all', icon: 'fa-solid fa-gamepad', description: '全部游戏资源', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'game-resources', name: '动作RPG', slug: 'gameres-action-rpg', icon: 'fa-solid fa-dragon', description: '动作RPG', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'game-resources', name: '射击FPS', slug: 'gameres-fps', icon: 'fa-solid fa-bullseye', description: '射击FPS', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'game-resources', name: '策略SLG', slug: 'gameres-slg', icon: 'fa-solid fa-chess', description: '策略SLG', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'game-resources', name: '模拟经营', slug: 'gameres-sim', icon: 'fa-solid fa-coins', description: '模拟经营', meta_schema: JSON.stringify({ fields: [] }) },
+
+        // 游戏大厅（.nav-inner）
+        { module_id: 'games', name: '全部游戏', slug: 'games-all', icon: 'fa-solid fa-gamepad', description: '全部游戏', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'games', name: 'FC/NES', slug: 'games-fc', icon: 'fa-solid fa-ghost', description: 'FC/NES（红白机）', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'games', name: 'SNES', slug: 'games-snes', icon: 'fa-solid fa-rocket', description: 'SNES（超任）', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'games', name: 'GBA', slug: 'games-gba', icon: 'fa-solid fa-tablet-screen-button', description: 'GBA（掌机）', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'games', name: 'NDS', slug: 'games-nds', icon: 'fa-solid fa-clone', description: 'NDS', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'games', name: 'PlayStation', slug: 'games-ps', icon: 'fa-brands fa-playstation', description: 'PlayStation', meta_schema: JSON.stringify({ fields: [] }) },
+        { module_id: 'games', name: '街机 Arcade', slug: 'games-arcade', icon: 'fa-solid fa-dice', description: '街机 Arcade', meta_schema: JSON.stringify({ fields: [] }) }
     ];
 
     defaultCategories.forEach((cat, index) => {
