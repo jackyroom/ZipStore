@@ -6,11 +6,14 @@
 }
 
 body {
-    background-color: var(--bg-color);
+    background-color: #091420;
+    /* 深色背景，与圆角窗口形成对比 */
     color: var(--text-main);
     font-family: 'Inter', 'PingFang SC', sans-serif;
     overflow: hidden;
     /* 防止整个页面滚动 */
+    padding: 12px;
+    /* 为圆角窗口留出空间 */
 }
 
 a {
@@ -26,8 +29,18 @@ ul {
 .app-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    width: 100vw;
+    height: calc(100vh - 24px);
+    /* 减去上下 padding */
+    width: calc(100vw - 24px);
+    /* 减去左右 padding */
+    margin: 0 auto;
+    background-color: var(--bg-color);
+    border-radius: 25px;
+    /* 圆角效果 */
+    overflow: hidden;
+    /* 确保内容不超出圆角 */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    /* 添加阴影增强窗口感 */
 }
 
 .layout-body {
@@ -490,8 +503,8 @@ ul {
 /* --- Content Area --- */
 .content-wrapper {
     flex: 1;
-    margin-top: 20px;
-    padding: 0 20px 40px 20px;
+    /*margin-top: 20px;*/
+    /*padding: 0 20px 40px 20px;*/
     overflow-y: auto;
     scroll-behavior: smooth;
 }
@@ -566,6 +579,19 @@ body.page-transitioning .content-wrapper {
 
     .app-container {
         flex-direction: column;
+        height: 100vh;
+        /* 移动端全屏 */
+        width: 100vw;
+        border-radius: 0;
+        /* 移动端无圆角 */
+        margin: 0;
+        box-shadow: none;
+        /* 移动端无阴影 */
+    }
+    
+    body {
+        padding: 0;
+        /* 移动端无 padding */
     }
 
     .sidebar {
